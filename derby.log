@@ -1,0 +1,13 @@
+----------------------------------------------------------------
+Sat Sep 30 14:18:53 CEST 2023:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-018a-e607-0148-0000008980e0 
+on database directory /Users/stellab/Documents/webdev/codersbay/Java/rest-api-for-task-app-main/javaproject/local with class loader jdk.internal.loader.ClassLoaders$AppClassLoader@4e0e2f2a 
+Loaded from file:/Users/stellab/.m2/repository/org/apache/derby/derby/10.14.2.0/derby-10.14.2.0.jar
+java.vendor=Oracle Corporation
+java.runtime.version=20.0.2+9-78
+user.dir=/Users/stellab/Documents/webdev/codersbay/Java/rest-api-for-task-app-main/javaproject
+os.name=Mac OS X
+os.arch=aarch64
+os.version=13.6
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
