@@ -5,7 +5,7 @@ public class RestApiResponse {
     String message;
     Object object;
 
-    public void RestAPIResponse(String message, Object object)  {
+    public  RestApiResponse(String message, Object object)  {
         this.message = message;
         this.object = object;
     }

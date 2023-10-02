@@ -20,6 +20,8 @@ public class UserService {
 
     }
 
+
+
     /**
      * add a new User to db
      * @param user
@@ -30,6 +32,10 @@ public class UserService {
         return user;
     }
 
+    /**
+     *
+     * @return a list of all users incl. their profiles and tasks
+     */
     public List<User> getUsers(){
         return userDAO.findAll();
     }
