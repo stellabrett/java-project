@@ -85,4 +85,12 @@ public Task(){
     public void setCompleted(boolean completed) {
         this.completed = completed;
     }
+
+    public Set<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(Set<User> users) {
+        this.users = users;
+    }
 }

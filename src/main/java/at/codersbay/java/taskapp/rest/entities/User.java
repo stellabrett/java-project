@@ -1,5 +1,6 @@
 package at.codersbay.java.taskapp.rest.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -31,13 +32,16 @@ public class User {
     @JoinColumn(name = "profile_id", referencedColumnName = "id")
     private Profile profile;
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(
             name = "user_tasks",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "task_id")
     )
+   @JsonIgnore
     Set<Task> tasks;
+
+
     public User() {
     }
 
@@ -95,6 +99,7 @@ public class User {
     public void setTasks(Set<Task> tasks) {
         this.tasks = tasks;
     }
+
 }
 
 

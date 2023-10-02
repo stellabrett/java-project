@@ -6,7 +6,9 @@ import at.codersbay.java.taskapp.rest.exceptions.PrimaryIdNullOrEmptyException;
 import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
 import at.codersbay.java.taskapp.rest.restapi.ProfileInputParam;
 import at.codersbay.java.taskapp.rest.restapi.RestApiResponse;
+import at.codersbay.java.taskapp.rest.restapi.TaskInputParam;
 import at.codersbay.java.taskapp.rest.services.ProfileService;
+import at.codersbay.java.taskapp.rest.services.TaskService;
 import at.codersbay.java.taskapp.rest.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,9 @@ public class ApplicationController {
 
     @Autowired
     private ProfileService profileService;
+
+    @Autowired
+    private TaskService taskService;
 
     /**
      * add a new User
@@ -84,6 +89,53 @@ public class ApplicationController {
         RestApiResponse response = new RestApiResponse(message, responseObject);
 
        return  new ResponseEntity<>(response, status);
+    }
+
+//////////////// tasks
+
+    /**
+     *
+     *
+     * @param param
+     * @return
+     */
+    @PostMapping("/task")
+    public ResponseEntity<RestApiResponse> createTask (@RequestBody TaskInputParam param){
+        HttpStatus status = null;
+        String message = "";
+        boolean result = false;
+
+        try{
+            boolean created = taskService.createTask(
+                   param.getUserIds(),
+                    param.getTitle(),
+                    param.getDescription(),
+                    param.getDeadline(),
+                    param.isCompleted()
+            );
+
+            if(created) {
+                status = HttpStatus.OK;
+                message = "Task created successfully";
+
+            }else{
+                status = HttpStatus.BAD_REQUEST;
+                message = "failed";
+
+            }
+        }catch (PrimaryIdNullOrEmptyException pinoee){
+            message = "please enter a user ID ";
+            status = HttpStatus.BAD_REQUEST;
+
+        }catch (UserNotFoundException unfe){
+            message = "user not found";
+            status = HttpStatus.NOT_FOUND;
+
+        }
+
+        RestApiResponse response = new RestApiResponse(message, result);
+
+        return  new ResponseEntity<>(response, status);
     }
 
 
