@@ -10,14 +10,11 @@ import at.codersbay.java.taskapp.rest.restapi.TaskInputParam;
 import at.codersbay.java.taskapp.rest.services.ProfileService;
 import at.codersbay.java.taskapp.rest.services.TaskService;
 import at.codersbay.java.taskapp.rest.services.UserService;
-import com.fasterxml.jackson.annotation.JsonView;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,6 +30,9 @@ public class ApplicationController {
     @Autowired
     private TaskService taskService;
 
+
+
+    /////////////////////////////// User
     /**
      * add a new User
      * @param user (firstname, lastname, email)
@@ -54,6 +54,29 @@ public class ApplicationController {
    public ResponseEntity<List<User>> getUsersWithTasks() {
        List<User> users = userService.getUsers();
        return new ResponseEntity<>(users, HttpStatus.OK);
+   }
+
+
+   @GetMapping("/userById/{id}")
+   public  ResponseEntity<RestApiResponse> getUserById(@PathVariable Long id){
+       HttpStatus status = null;
+       String message = "";
+       User user = null;
+
+       try {
+           user = this.userService.getUserById(id);
+           status = HttpStatus.OK;
+
+       }catch(PrimaryIdNullOrEmptyException pinoee) {
+           message = pinoee.getDefaultMessage();
+           status = HttpStatus.BAD_REQUEST;
+
+       }catch (UserNotFoundException unfe){
+           message = unfe.getDefaultMessage();
+           status = HttpStatus.NOT_FOUND;
+       }
+       RestApiResponse response = new RestApiResponse(message, user);
+       return  new ResponseEntity<>(response, status);
    }
 
 ///////////////// profile
