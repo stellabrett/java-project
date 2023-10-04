@@ -48,10 +48,24 @@ public class UserService {
 
     public User getUserById(Long userId) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
         if (userId == null) {
-            throw new PrimaryIdNullOrEmptyException("User ID is null or empty");
+            throw new PrimaryIdNullOrEmptyException();
         }
 
         Optional<User> userOptional = userDAO.findById(userId);
+
+        if (userOptional.isPresent()) {
+            return userOptional.get();
+        } else {
+            throw new UserNotFoundException();
+        }
+    }
+
+    public User getUserByEmail(String email) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
+        if (email == null) {
+            throw new PrimaryIdNullOrEmptyException();
+        }
+
+        Optional<User> userOptional = userDAO.findUserByEmail(email);
 
         if (userOptional.isPresent()) {
             return userOptional.get();

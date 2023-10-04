@@ -79,6 +79,29 @@ public class ApplicationController {
        return  new ResponseEntity<>(response, status);
    }
 
+    @GetMapping("/userByEmail/{email}")
+    public  ResponseEntity<RestApiResponse> getUserByEmail(@PathVariable String email){
+        HttpStatus status = null;
+        String message = "";
+        User user = null;
+
+        try {
+            user = this.userService.getUserByEmail(email);
+            status = HttpStatus.OK;
+            message = "e voila";
+
+        }catch(PrimaryIdNullOrEmptyException pinoee) {
+            message = pinoee.getDefaultMessage();
+            status = HttpStatus.BAD_REQUEST;
+
+        }catch (UserNotFoundException unfe){
+            message = unfe.getDefaultMessage();
+            status = HttpStatus.NOT_FOUND;
+        }
+        RestApiResponse response = new RestApiResponse(message, user);
+        return  new ResponseEntity<>(response, status);
+    }
+
 ///////////////// profile
 
 
