@@ -10,6 +10,7 @@ import at.codersbay.java.taskapp.rest.restapi.TaskInputParam;
 import at.codersbay.java.taskapp.rest.services.ProfileService;
 import at.codersbay.java.taskapp.rest.services.TaskService;
 import at.codersbay.java.taskapp.rest.services.UserService;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,9 +48,13 @@ public class ApplicationController {
      * @return all users
      */
    @GetMapping("/users")
-        List<User> getUser(){
+       /* List<User> getUser(){
             return userService.getUsers();
-        }
+        }*/
+   public ResponseEntity<List<User>> getUsersWithTasks() {
+       List<User> users = userService.getUsers();
+       return new ResponseEntity<>(users, HttpStatus.OK);
+   }
 
 ///////////////// profile
 
@@ -117,6 +122,7 @@ public class ApplicationController {
             if(created) {
                 status = HttpStatus.OK;
                 message = "Task created successfully";
+                result = true;
 
             }else{
                 status = HttpStatus.BAD_REQUEST;
