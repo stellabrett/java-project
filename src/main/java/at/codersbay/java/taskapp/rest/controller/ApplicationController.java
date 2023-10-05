@@ -57,6 +57,12 @@ public class ApplicationController {
    }
 
 
+   //TODO show tasks
+    /**
+     *
+     * @param id
+     * @return a user incl.profile and tasks
+     */
    @GetMapping("/userById/{id}")
    public  ResponseEntity<RestApiResponse> getUserById(@PathVariable Long id){
        HttpStatus status = null;
@@ -79,6 +85,13 @@ public class ApplicationController {
        return  new ResponseEntity<>(response, status);
    }
 
+
+   //TODO tasks
+    /**
+     * finds a user by email
+     * @param email
+     * @return a user incl. profile und  tasks
+     */
     @GetMapping("/userByEmail/{email}")
     public  ResponseEntity<RestApiResponse> getUserByEmail(@PathVariable String email){
         HttpStatus status = null;
@@ -99,6 +112,36 @@ public class ApplicationController {
             status = HttpStatus.NOT_FOUND;
         }
         RestApiResponse response = new RestApiResponse(message, user);
+        return  new ResponseEntity<>(response, status);
+    }
+
+
+
+    @PutMapping("/user/{id}")
+    public ResponseEntity<RestApiResponse> updateUser(
+            @PathVariable Long id,
+            @RequestBody User updatedUser
+    ){
+        HttpStatus status = null;
+        String message = "";
+        User resultUser = null;
+
+        try {
+            User updated  = this.userService.updateUser(id, updatedUser);
+            if (updated != null) {
+
+                status = HttpStatus.OK;
+                message = "e voila";
+                resultUser = updated;
+            }else{
+                status = HttpStatus.BAD_REQUEST;
+                message ="update user failed";
+            }
+        }catch (UserNotFoundException unfe){
+            message = unfe.getDefaultMessage();
+            status = HttpStatus.NOT_FOUND;
+        }
+        RestApiResponse response = new RestApiResponse(message, resultUser);
         return  new ResponseEntity<>(response, status);
     }
 
@@ -189,6 +232,8 @@ public class ApplicationController {
 
         return  new ResponseEntity<>(response, status);
     }
+
+
 
 
 
