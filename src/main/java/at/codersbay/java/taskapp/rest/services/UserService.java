@@ -76,24 +76,10 @@ public class UserService {
     }
 
 
-    //TODO rette
-    /*
-    public User updateUser(Long id) throws PrimaryIdNullOrEmptyException, UserNotFoundException{
-        if (id == null){
+    public User updateUser(Long id, User updatedUser) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
+        if ( id == null){
             throw new PrimaryIdNullOrEmptyException();
         }
-        User user = this.userDAO.findById(id).get();
-        if (user.getLastname() == null) {
-            user.setLastname();
-        } else {
-            user.getUser().setText(text);
-        }
-
-        return this.coursesDao.save(course);
-
-
-    }*/
-    public User updateUser(Long id, User updatedUser) throws UserNotFoundException {
         Optional<User> userOptional = userDAO.findById(id);
 
         if (userOptional.isPresent()) {
@@ -119,6 +105,27 @@ public class UserService {
             throw new UserNotFoundException();
         }
     }
+
+    public boolean deleteUser (Long id) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
+
+        if (id == null) {
+            throw new PrimaryIdNullOrEmptyException();
+        }
+
+        Optional<User> userOptional = userDAO.findById(id);
+
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+
+            user.getTasks().clear();
+            userDAO.delete(user);
+            return true;
+        }else{
+            throw new UserNotFoundException();
+        }
+
+    }
+
 
 
 }

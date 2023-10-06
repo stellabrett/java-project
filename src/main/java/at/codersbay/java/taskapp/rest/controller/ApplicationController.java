@@ -133,17 +133,46 @@ public class ApplicationController {
                 status = HttpStatus.OK;
                 message = "e voila";
                 resultUser = updated;
-            }else{
+            }
+            else{
                 status = HttpStatus.BAD_REQUEST;
                 message ="update user failed";
             }
         }catch (UserNotFoundException unfe){
             message = unfe.getDefaultMessage();
             status = HttpStatus.NOT_FOUND;
+        }catch(PrimaryIdNullOrEmptyException pinoee) {
+            message = pinoee.getDefaultMessage();
+            status = HttpStatus.BAD_REQUEST;
         }
         RestApiResponse response = new RestApiResponse(message, resultUser);
         return  new ResponseEntity<>(response, status);
     }
+
+    @DeleteMapping("user/{id}")
+    ResponseEntity<RestApiResponse> deleteUser(@PathVariable Long id){
+        HttpStatus status = null;
+        String message = "";
+        boolean result = false;
+
+        try{
+            result = userService.deleteUser(id);
+            status = HttpStatus.OK;
+            message= "User succsessfully deleted";
+
+        }catch (UserNotFoundException unfe){
+        message = unfe.getDefaultMessage();
+        status = HttpStatus.NOT_FOUND;
+
+        }catch(PrimaryIdNullOrEmptyException pinoee) {
+        message = pinoee.getDefaultMessage();
+        status = HttpStatus.BAD_REQUEST;
+    }
+    RestApiResponse response = new RestApiResponse(message, result);
+        return  new ResponseEntity<>(response, status);
+    }
+
+
 
 ///////////////// profile
 
