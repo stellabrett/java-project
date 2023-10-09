@@ -4,12 +4,16 @@ import at.codersbay.java.taskapp.rest.dao.ProfileDAO;
 import at.codersbay.java.taskapp.rest.dao.TaskDAO;
 import at.codersbay.java.taskapp.rest.dao.UserDAO;
 import at.codersbay.java.taskapp.rest.entities.Profile;
+import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
+import at.codersbay.java.taskapp.rest.exceptions.EntityNotFoundException;
 import at.codersbay.java.taskapp.rest.exceptions.PrimaryIdNullOrEmptyException;
 import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
+import at.codersbay.java.taskapp.rest.restapi.UserTaskResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -41,8 +45,25 @@ public class UserService {
      *
      * @return a list of all users incl. their profiles and tasks
      */
-    public List<User> getUsers(){
+   /* public List<User> getUsers(){
         return userDAO.findAll();
+    }*/
+
+    public List<UserTaskResponse> getUsers() throws EntityNotFoundException {
+        List<User> users = userDAO.findAll();
+        List<UserTaskResponse> userTaskResponses = new ArrayList<>();
+
+        for (User user : users) {
+            Set<Task> tasks = user.getTasks();
+            Profile profile = user.getProfile();
+            userTaskResponses.add(new UserTaskResponse(user, tasks, profile));
+        }
+
+        if (userTaskResponses.isEmpty()) {
+            throw new EntityNotFoundException();
+        }
+
+        return userTaskResponses;
     }
 
 
@@ -75,7 +96,14 @@ public class UserService {
         }
     }
 
-
+    /**
+     * update user and profile
+     * @param id prom PathVariable
+     * @param updatedUser from Request body
+     * @return user
+     * @throws PrimaryIdNullOrEmptyException
+     * @throws UserNotFoundException
+     */
     public User updateUser(Long id, User updatedUser) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
         if ( id == null){
             throw new PrimaryIdNullOrEmptyException();
@@ -106,6 +134,13 @@ public class UserService {
         }
     }
 
+    /**
+     * delete user, and delete user from their tasks
+     * @param id
+     * @return boolean
+     * @throws PrimaryIdNullOrEmptyException
+     * @throws UserNotFoundException
+     */
     public boolean deleteUser (Long id) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
 
         if (id == null) {

@@ -4,14 +4,17 @@ import at.codersbay.java.taskapp.rest.dao.TaskDAO;
 import at.codersbay.java.taskapp.rest.dao.UserDAO;
 import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
+import at.codersbay.java.taskapp.rest.exceptions.EntityNotFoundException;
 import at.codersbay.java.taskapp.rest.exceptions.PrimaryIdNullOrEmptyException;
 import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -53,6 +56,26 @@ public class TaskService {
 
     }
 
+    /**
+     * Get all Tasks
+     * @return all Tasks incl associated user
+     */
     public List<Task> getTasks() {return  taskDAO.findAll();}
+
+
+    public Task getTaskById(Long id) throws PrimaryIdNullOrEmptyException, EntityNotFoundException {
+        if (id == null) {
+            throw new PrimaryIdNullOrEmptyException();
+        }
+
+        Optional<Task> taskOptional = taskDAO.findById(id);
+
+        if (taskOptional.isPresent()) {
+            return taskOptional.get();
+        }
+        throw new EntityNotFoundException("No task found for ID: " + id);
+
+    }
+
 
 }

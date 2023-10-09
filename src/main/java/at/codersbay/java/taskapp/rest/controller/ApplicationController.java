@@ -3,11 +3,13 @@ package at.codersbay.java.taskapp.rest.controller;
 import at.codersbay.java.taskapp.rest.entities.Profile;
 import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
+import at.codersbay.java.taskapp.rest.exceptions.EntityNotFoundException;
 import at.codersbay.java.taskapp.rest.exceptions.PrimaryIdNullOrEmptyException;
 import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
 import at.codersbay.java.taskapp.rest.restapi.ProfileInputParam;
 import at.codersbay.java.taskapp.rest.restapi.RestApiResponse;
 import at.codersbay.java.taskapp.rest.restapi.TaskInputParam;
+import at.codersbay.java.taskapp.rest.restapi.UserTaskResponse;
 import at.codersbay.java.taskapp.rest.services.ProfileService;
 import at.codersbay.java.taskapp.rest.services.TaskService;
 import at.codersbay.java.taskapp.rest.services.UserService;
@@ -17,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -51,11 +54,15 @@ public class ApplicationController {
      * @return all users
      */
     @GetMapping("/users")
-
-    public ResponseEntity<List<User>> getUsersWithTasks() {
-        List<User> users = userService.getUsers();
-        return new ResponseEntity<>(users, HttpStatus.OK);
+    public ResponseEntity<List<UserTaskResponse>> getUsers() {
+        try {
+            List<UserTaskResponse> userTaskResponses = userService.getUsers();
+            return new ResponseEntity<>(userTaskResponses, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
+
 
 
     //TODO show tasks
@@ -276,13 +283,39 @@ public class ApplicationController {
 
         return new ResponseEntity<>(response, status);
     }
-    @GetMapping("/tasks")
 
+    /**
+     * get all tasks
+     * @return  all tasks incl associated User
+     */
+    @GetMapping("/tasks")
     public ResponseEntity<List<Task>> getTasks() {
         List<Task> tasks = taskService.getTasks();
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
+
+    @GetMapping("/task/{id}")
+    public ResponseEntity<RestApiResponse> getTaskById(@PathVariable Long id){
+        HttpStatus status = null;
+        String message = "";
+        Task task= null;
+
+        try{
+            task = taskService.getTaskById(id);
+            status = HttpStatus.OK;
+            message = " ein task bitteschen";
+        } catch (PrimaryIdNullOrEmptyException pinoee){
+            status = HttpStatus.BAD_REQUEST;
+            message = pinoee.getDefaultMessage();
+        }catch (EntityNotFoundException enfe){
+            status = HttpStatus.NOT_FOUND;
+            message = enfe.getDefaultMessage();
+        }
+
+        RestApiResponse response = new RestApiResponse(message, task);
+        return new ResponseEntity<>(response, status);
+    }
 }
 
 

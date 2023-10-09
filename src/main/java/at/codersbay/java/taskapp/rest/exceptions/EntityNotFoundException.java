@@ -1,19 +1,26 @@
 package at.codersbay.java.taskapp.rest.exceptions;
 
 public class EntityNotFoundException extends Exception{
-    private Long id;
+    private final String defaultMessage = "Entity not found";
+    private Long entityId;
+    public EntityNotFoundException () {
+        super();
+    }
 
-    public EntityNotFoundException(String message, Long id) {
+    public EntityNotFoundException(String message) {
         super(message);
-        this.id = id;
     }
 
-    public Long getId() {
-        return id;
+    public EntityNotFoundException(String message, Long entityId){
+        super(message);
+        this.entityId = entityId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public String getDefaultMessage(){
+        return defaultMessage;
+    }
+    public Long getEntityId(){
+        return entityId;
     }
 }
 
