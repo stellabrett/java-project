@@ -1,5 +1,6 @@
 package at.codersbay.java.taskapp.rest.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -26,7 +27,8 @@ public class Profile {
 
     private String profilePhoto;
 
-    @OneToOne(fetch =FetchType.EAGER, mappedBy = "profile")
+    @JsonIgnore
+    @OneToOne( mappedBy = "profile")
     private User user;
 
     public Profile(){
@@ -57,6 +59,14 @@ public class Profile {
 
     public String getProfilePhoto() {
         return profilePhoto;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public void setProfilePhoto(String profilePhoto) {

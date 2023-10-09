@@ -5,16 +5,15 @@ import at.codersbay.java.taskapp.rest.dao.UserDAO;
 import at.codersbay.java.taskapp.rest.entities.Profile;
 import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
+import at.codersbay.java.taskapp.rest.exceptions.EntityNotFoundException;
 import at.codersbay.java.taskapp.rest.exceptions.PrimaryIdNullOrEmptyException;
 import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
 import at.codersbay.java.taskapp.rest.restapi.ProfileInputParam;
+import at.codersbay.java.taskapp.rest.restapi.ProfileUserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class ProfileService {
@@ -64,7 +63,23 @@ public class ProfileService {
 
     }
 
-    public List<Profile> getProfiles() {return  profileDAO.findAll();}
+    public List<ProfileUserResponse> getProfiles()throws EntityNotFoundException{
+        List<Profile> profiles = profileDAO.findAll();
+        List<ProfileUserResponse> profileUserResponse = new ArrayList<>();
+        for (Profile profile : profiles){
+            User user = profile.getUser();
+            profileUserResponse.add(new ProfileUserResponse(user, profile));
+        }
+
+        if(profileUserResponse.isEmpty()){
+            throw new EntityNotFoundException();
+        }
+
+        return  profileUserResponse;
+
+    }
+
+
 
 
 

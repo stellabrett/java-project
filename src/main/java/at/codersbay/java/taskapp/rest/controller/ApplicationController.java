@@ -6,10 +6,7 @@ import at.codersbay.java.taskapp.rest.entities.User;
 import at.codersbay.java.taskapp.rest.exceptions.EntityNotFoundException;
 import at.codersbay.java.taskapp.rest.exceptions.PrimaryIdNullOrEmptyException;
 import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
-import at.codersbay.java.taskapp.rest.restapi.ProfileInputParam;
-import at.codersbay.java.taskapp.rest.restapi.RestApiResponse;
-import at.codersbay.java.taskapp.rest.restapi.TaskInputParam;
-import at.codersbay.java.taskapp.rest.restapi.UserTaskResponse;
+import at.codersbay.java.taskapp.rest.restapi.*;
 import at.codersbay.java.taskapp.rest.services.ProfileService;
 import at.codersbay.java.taskapp.rest.services.TaskService;
 import at.codersbay.java.taskapp.rest.services.UserService;
@@ -241,10 +238,16 @@ public class ApplicationController {
     }
 
     @GetMapping("/profiles")
-    public ResponseEntity<List<Profile>> getProfiles() {
-        List<Profile> profiles = profileService.getProfiles();
-        return new ResponseEntity<>(profiles, HttpStatus.OK);
+    public ResponseEntity<List<ProfileUserResponse>> getProfiles() {
+        try {
+            List<ProfileUserResponse> profileUserResponses = profileService.getProfiles();
+            return new ResponseEntity<>(profileUserResponses, HttpStatus.OK);
+        } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
+
+
 
 //////////////// tasks
 
