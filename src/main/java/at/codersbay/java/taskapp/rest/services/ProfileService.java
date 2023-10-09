@@ -3,6 +3,7 @@ package at.codersbay.java.taskapp.rest.services;
 import at.codersbay.java.taskapp.rest.dao.ProfileDAO;
 import at.codersbay.java.taskapp.rest.dao.UserDAO;
 import at.codersbay.java.taskapp.rest.entities.Profile;
+import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
 import at.codersbay.java.taskapp.rest.exceptions.PrimaryIdNullOrEmptyException;
 import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -61,6 +63,10 @@ public class ProfileService {
         return true;
 
     }
+
+    public List<Profile> getProfiles() {return  profileDAO.findAll();}
+
+
 
 }
 

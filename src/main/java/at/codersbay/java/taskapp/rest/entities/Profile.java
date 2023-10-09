@@ -26,7 +26,7 @@ public class Profile {
 
     private String profilePhoto;
 
-    @OneToOne(mappedBy = "profile")
+    @OneToOne(fetch =FetchType.EAGER, mappedBy = "profile")
     private User user;
 
     public Profile(){

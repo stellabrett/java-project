@@ -195,6 +195,8 @@ public class ApplicationController {
     }
 
 
+
+
 ///////////////// profile
 
 
@@ -236,6 +238,12 @@ public class ApplicationController {
         RestApiResponse response = new RestApiResponse(message, responseObject);
 
         return new ResponseEntity<>(response, status);
+    }
+
+    @GetMapping("/profiles")
+    public ResponseEntity<List<Profile>> getProfiles() {
+        List<Profile> profiles = profileService.getProfiles();
+        return new ResponseEntity<>(profiles, HttpStatus.OK);
     }
 
 //////////////// tasks
@@ -294,7 +302,11 @@ public class ApplicationController {
         return new ResponseEntity<>(tasks, HttpStatus.OK);
     }
 
-
+    /**
+     * get Task by Id and the associated User
+     * @param id
+     * @return a message and the object with the task and the associated User
+     */
     @GetMapping("/task/{id}")
     public ResponseEntity<RestApiResponse> getTaskById(@PathVariable Long id){
         HttpStatus status = null;
@@ -304,7 +316,7 @@ public class ApplicationController {
         try{
             task = taskService.getTaskById(id);
             status = HttpStatus.OK;
-            message = " ein task bitteschen";
+            message = " ein task bitteeeschen";
         } catch (PrimaryIdNullOrEmptyException pinoee){
             status = HttpStatus.BAD_REQUEST;
             message = pinoee.getDefaultMessage();
@@ -316,6 +328,36 @@ public class ApplicationController {
         RestApiResponse response = new RestApiResponse(message, task);
         return new ResponseEntity<>(response, status);
     }
+
+
+    /**
+     * delete Task by Id
+     * @param id
+     * @return message and boolean
+     */
+    @DeleteMapping("task/{id}")
+    ResponseEntity<RestApiResponse> deleteTask(@PathVariable Long id) {
+        HttpStatus status = null;
+        String message = "";
+        boolean result = false;
+
+        try {
+            result = taskService.deleteTask(id);
+            status = HttpStatus.OK;
+            message = "Task succsessfully deleted";
+
+        } catch (EntityNotFoundException enfe) {
+            message = enfe.getDefaultMessage();
+            status = HttpStatus.NOT_FOUND;
+
+        } catch (PrimaryIdNullOrEmptyException pinoee) {
+            message = pinoee.getDefaultMessage();
+            status = HttpStatus.BAD_REQUEST;
+        }
+        RestApiResponse response = new RestApiResponse(message, result);
+        return new ResponseEntity<>(response, status);
+    }
+
 }
 
 

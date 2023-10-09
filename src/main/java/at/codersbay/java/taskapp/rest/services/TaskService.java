@@ -12,10 +12,7 @@ import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class TaskService {
@@ -62,7 +59,13 @@ public class TaskService {
      */
     public List<Task> getTasks() {return  taskDAO.findAll();}
 
-
+    /**
+     *
+     * @param id
+     * @return task
+     * @throws PrimaryIdNullOrEmptyException
+     * @throws EntityNotFoundException
+     */
     public Task getTaskById(Long id) throws PrimaryIdNullOrEmptyException, EntityNotFoundException {
         if (id == null) {
             throw new PrimaryIdNullOrEmptyException();
@@ -73,9 +76,51 @@ public class TaskService {
         if (taskOptional.isPresent()) {
             return taskOptional.get();
         }
-        throw new EntityNotFoundException("No task found for ID: " + id);
+        throw new EntityNotFoundException();
 
     }
+
+    /**
+     * delete Task  by  Id
+     * @param id
+     * @return boolean
+     * @throws PrimaryIdNullOrEmptyException
+     * @throws EntityNotFoundException
+     */
+
+    public boolean deleteTask(Long id) throws PrimaryIdNullOrEmptyException, EntityNotFoundException {
+
+        if (id == null) {
+            throw new PrimaryIdNullOrEmptyException("given id is null.");
+        }
+
+        Task task = null;
+
+        try {
+            task = this.taskDAO.findById(id).get();
+
+            if (task.getUsers() != null && task.getUsers().size() > 0) {
+                for (User user : task.getUsers()) {
+                    user.setTasks(null);
+                    this.userDAO.save(user);
+                }
+            }
+
+            this.taskDAO.delete(task);
+        } catch (NoSuchElementException nsee) {
+            throw new EntityNotFoundException("could not found task with given id.", id);
+        }
+
+        try {
+            task = this.taskDAO.findById(id).get();
+        } catch (NoSuchElementException nsee) {
+            return true;
+        }
+
+        return false;
+    }
+
+
 
 
 }
