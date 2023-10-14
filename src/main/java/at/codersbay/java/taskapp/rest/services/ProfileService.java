@@ -63,6 +63,11 @@ public class ProfileService {
 
     }
 
+    /**
+     * get all profiles incl. the associated user
+     * @return
+     * @throws EntityNotFoundException
+     */
     public List<ProfileUserResponse> getProfiles()throws EntityNotFoundException{
         List<Profile> profiles = profileDAO.findAll();
         List<ProfileUserResponse> profileUserResponse = new ArrayList<>();
@@ -78,6 +83,33 @@ public class ProfileService {
         return  profileUserResponse;
 
     }
+
+    /**
+     * get profile by user Id
+     * @param userId
+     * @return user incl. profile
+     * @throws PrimaryIdNullOrEmptyException
+     * @throws UserNotFoundException
+     */
+    public ProfileUserResponse getProfileById(Long userId) throws PrimaryIdNullOrEmptyException, UserNotFoundException{
+        if(userId == null){
+            throw new PrimaryIdNullOrEmptyException();
+        }
+
+        Optional<Profile> profileOptional = profileDAO.findById(userId);
+
+     if (profileOptional.isPresent()){
+         Profile profile = profileOptional.get();
+         User user = profile.getUser();
+         return new ProfileUserResponse(user,profile);
+     } else {
+         throw new UserNotFoundException();
+     }
+
+    }
+
+
+
 
 
 

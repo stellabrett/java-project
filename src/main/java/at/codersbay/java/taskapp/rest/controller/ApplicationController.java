@@ -237,12 +237,34 @@ public class ApplicationController {
         return new ResponseEntity<>(response, status);
     }
 
+    /**
+     * get all profiles incl. the associated user
+     * @return na das selbe...
+     */
     @GetMapping("/profiles")
     public ResponseEntity<List<ProfileUserResponse>> getProfiles() {
         try {
             List<ProfileUserResponse> profileUserResponses = profileService.getProfiles();
             return new ResponseEntity<>(profileUserResponses, HttpStatus.OK);
         } catch (EntityNotFoundException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+
+    /**
+     * get profile by user Id
+     * @param userId
+     * @return user incl. profile
+     */
+    @GetMapping("/profiles/{id}")
+    public ResponseEntity <ProfileUserResponse> getProfileById(@PathVariable Long userId) {
+        try {
+            ProfileUserResponse profileUserResponses = profileService.getProfileById(userId);
+            return new ResponseEntity<>(profileUserResponses, HttpStatus.OK);
+        } catch (PrimaryIdNullOrEmptyException e) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }catch (UserNotFoundException unfe){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
