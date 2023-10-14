@@ -154,6 +154,15 @@ public class ProfileService {
         userDAO.save(user);
     }
 
+    /**
+     * searches for the profile based on the passed ID and delete it, optional also the user
+     *
+     * @param profileId the id of the profile to delete
+     * @param deleteUser the input parameters to delete the user, false = delete user, true = do not delete user
+     * @throws PrimaryIdNullOrEmptyException when given id is null or invalid
+     * @throws ProfileNotFoundException if the profile with the given id is not found
+     * @throws UserNotFoundException when the associated User of the profile is not found
+     */
     @Transactional
     public void deleteProfileById(Long profileId, boolean deleteUser)
             throws PrimaryIdNullOrEmptyException,ProfileNotFoundException, UserNotFoundException{

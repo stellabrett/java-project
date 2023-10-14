@@ -2,15 +2,17 @@ package at.codersbay.java.taskapp.rest.services;
 
 import at.codersbay.java.taskapp.rest.dao.TaskDAO;
 import at.codersbay.java.taskapp.rest.dao.UserDAO;
+import at.codersbay.java.taskapp.rest.entities.Profile;
 import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
-import at.codersbay.java.taskapp.rest.exceptions.EntityNotFoundException;
-import at.codersbay.java.taskapp.rest.exceptions.PrimaryIdNullOrEmptyException;
-import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
+import at.codersbay.java.taskapp.rest.exceptions.*;
+import at.codersbay.java.taskapp.rest.restapi.ProfileUserInputParam;
+import at.codersbay.java.taskapp.rest.restapi.TaskUserInputParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -23,16 +25,16 @@ public class TaskService {
     @Autowired
     UserDAO userDAO;
 
-    public TaskService(){
+    public TaskService() {
 
     }
 
-    public boolean createTask(Set<Long> userIds, String title, String description, LocalDate deadline, boolean completed )
-    throws PrimaryIdNullOrEmptyException,UserNotFoundException {
-        if(userIds == null || userIds.isEmpty()){
+    public boolean createTask(Set<Long> userIds, String title, String description, LocalDate deadline, boolean completed)
+            throws PrimaryIdNullOrEmptyException, UserNotFoundException {
+        if (userIds == null || userIds.isEmpty()) {
             throw new PrimaryIdNullOrEmptyException("user Ids are null or empty");
         }
-       // Set<User> user = new HashSet<>();
+        // Set<User> user = new HashSet<>();
 
         Task task = new Task();
         task.setTitle(title);
@@ -40,7 +42,7 @@ public class TaskService {
         task.setDeadline(deadline);
         task.setCompleted(completed);
 
-        for (Long userId : userIds){
+        for (Long userId : userIds) {
             User user = userDAO.findById(userId).orElseThrow(() -> new UserNotFoundException("user not found", userId));
             user.getTasks().add(task);
         }
@@ -55,12 +57,14 @@ public class TaskService {
 
     /**
      * Get all Tasks
+     *
      * @return all Tasks incl associated user
      */
-    public List<Task> getTasks() {return  taskDAO.findAll();}
+    public List<Task> getTasks() {
+        return taskDAO.findAll();
+    }
 
     /**
-     *
      * @param id
      * @return task
      * @throws PrimaryIdNullOrEmptyException
@@ -82,6 +86,7 @@ public class TaskService {
 
     /**
      * delete Task  by  Id
+     *
      * @param id
      * @return boolean
      * @throws PrimaryIdNullOrEmptyException
@@ -120,7 +125,40 @@ public class TaskService {
         return false;
     }
 
+    @Transactional
+    public Task updateTask(Long taskId, TaskUserInputParam param)
+            throws PrimaryIdNullOrEmptyException, TaskNotFoundException, UserNotFoundException {
+        if (taskId == null) {
+            throw new PrimaryIdNullOrEmptyException();
+        }
+
+        Task existingTask = taskDAO.findById(taskId)
+                .orElseThrow(() -> new TaskNotFoundException("task not found", null));
+
+        existingTask.setTitle(param.getTitle());
+        existingTask.setDescription(param.getDescription());
+        existingTask.setDeadline(param.getDeadline());
+        existingTask.setCompleted(param.isCompleted());
+
+        if (param.getUserIds() != null && param.getUserIds().isEmpty()) {
+            Set<Long> newUserIds = param.getUserIds();
+            Set<User> updatedUsers = new HashSet<>();
+
+            for (Long userId : newUserIds) {
+                User user = userDAO.findById(userId)
+                        .orElseThrow(() -> new UserNotFoundException());
 
 
+                user.getTasks().add(existingTask);
+                updatedUsers.add(user);
+            }
+            existingTask.setUsers(updatedUsers);
+        }
+        return taskDAO.save(existingTask);
 
+    }
 }
+
+
+
+

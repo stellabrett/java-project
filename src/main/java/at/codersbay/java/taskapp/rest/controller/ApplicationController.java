@@ -3,10 +3,7 @@ package at.codersbay.java.taskapp.rest.controller;
 import at.codersbay.java.taskapp.rest.entities.Profile;
 import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
-import at.codersbay.java.taskapp.rest.exceptions.EntityNotFoundException;
-import at.codersbay.java.taskapp.rest.exceptions.PrimaryIdNullOrEmptyException;
-import at.codersbay.java.taskapp.rest.exceptions.ProfileNotFoundException;
-import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
+import at.codersbay.java.taskapp.rest.exceptions.*;
 import at.codersbay.java.taskapp.rest.restapi.*;
 import at.codersbay.java.taskapp.rest.services.ProfileService;
 import at.codersbay.java.taskapp.rest.services.TaskService;
@@ -302,6 +299,18 @@ public class ApplicationController {
 
     }
 
+    /**
+     * Api endpoint to delete a profile and optional the associated user
+     *
+     * HTTP request method: DELETE
+     * Path: /profiles/{id}
+     *
+     * @param id profileId
+     * @param deleteUser the input parameter, true for deleting the user, false for not deleting the user
+     * @return HTTP status 200 (OK) and a success message
+     * HTTP status 404 (Not Found) if the profile was not found , error message
+     * HTTP status 500 (Bad Request) if the given id is null, error message
+     */
     @DeleteMapping("/profiles/{id}")
     public ResponseEntity<String>deleteProfileById(
             @PathVariable Long id,
@@ -431,6 +440,34 @@ public class ApplicationController {
         }
         RestApiResponse response = new RestApiResponse(message, result);
         return new ResponseEntity<>(response, status);
+    }
+
+    //TODO ERROR HAndling
+    /**
+     * Api endpoint for updating a task by its it and optional its users
+     *
+     * HTTP request method: PUT
+     * Path: /tasks/{id}
+     *
+     * @param taskId task id
+     * @param param the input parameters, containing the updated task and user Ids
+     * @return
+     */
+    @PutMapping("/tasks/{taskId}")
+    public ResponseEntity<?> updateTask(
+            @PathVariable Long taskId,
+            @RequestBody TaskUserInputParam param
+    ) {
+        try {
+            Task updatedTask = taskService.updateTask(taskId, param);
+            return new ResponseEntity<>(updatedTask, HttpStatus.OK);
+        } catch (TaskNotFoundException tnfe) {
+            return new ResponseEntity<>(tnfe.getDefaultMessage(), HttpStatus.NOT_FOUND);
+        } catch (UserNotFoundException unfe) {
+            return new ResponseEntity<>(unfe.getDefaultMessage(), HttpStatus.NOT_FOUND);
+        } catch (PrimaryIdNullOrEmptyException pinoee) {
+            return new ResponseEntity<>(pinoee.getDefaultMessage(), HttpStatus.BAD_REQUEST);
+        }
     }
 
 }
