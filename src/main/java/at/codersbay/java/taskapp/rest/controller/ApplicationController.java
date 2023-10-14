@@ -5,6 +5,7 @@ import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
 import at.codersbay.java.taskapp.rest.exceptions.EntityNotFoundException;
 import at.codersbay.java.taskapp.rest.exceptions.PrimaryIdNullOrEmptyException;
+import at.codersbay.java.taskapp.rest.exceptions.ProfileNotFoundException;
 import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
 import at.codersbay.java.taskapp.rest.restapi.*;
 import at.codersbay.java.taskapp.rest.services.ProfileService;
@@ -253,20 +254,52 @@ public class ApplicationController {
 
 
     /**
-     * get profile by user Id
-     * @param userId
-     * @return user incl. profile
+     * API endpoint to query a profile by user Id
+     *
+     * HTTP request method: GET
+     * Path: /profiles/{id}
+     *
+     * @param id users Id
+     * @return HTTP status 200 (OK) and the queried profile incl. associated user,
+     * HTTP status 404 (Not Found) if the user was not found
+     * HTTP status 500 (Bad Request) if the given id is null
      */
     @GetMapping("/profiles/{id}")
-    public ResponseEntity <ProfileUserResponse> getProfileById(@PathVariable Long userId) {
+    public ResponseEntity <ProfileUserResponse> getProfileById(@PathVariable Long id) {
         try {
-            ProfileUserResponse profileUserResponses = profileService.getProfileById(userId);
+            ProfileUserResponse profileUserResponses = profileService.getProfileById(id);
             return new ResponseEntity<>(profileUserResponses, HttpStatus.OK);
-        } catch (PrimaryIdNullOrEmptyException e) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }catch (UserNotFoundException unfe){
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } catch (PrimaryIdNullOrEmptyException pinoee) {
+            return new ResponseEntity<>(new ProfileUserResponse(pinoee.getDefaultMessage()), HttpStatus.BAD_REQUEST);
+        } catch (UserNotFoundException unfe) {
+            return new ResponseEntity<>(new ProfileUserResponse(unfe.getDefaultMessage()), HttpStatus.NOT_FOUND);
         }
+    }
+
+    /**
+     * Api endpoint to update an existing profile and associated user data based on the given id
+     * HTTP request method: PUT
+     * Path: /profiles/{id}
+     *
+     * @param id profileId
+     * @param param the input parameters,that containing the updated profile and user infos.
+     * @return HTTP status 200 (OK) and a success message
+     * HTTP status 404 (Not Found) if the user was not found , error message
+     * HTTP status 500 (Bad Request) if the given id is null, error message
+     */
+    @PutMapping("/profiles/{id}")
+    public ResponseEntity<String> updateProfileAndUser(@PathVariable Long id, @RequestBody ProfileUserInputParam param) {
+        try {
+            profileService.updateProfileAndUser(id, param);
+            return new ResponseEntity<>("Profile and User updated successfully", HttpStatus.OK);
+        } catch (ProfileNotFoundException pnf) {
+            return new ResponseEntity<>(pnf.getDefaultMessage(), HttpStatus.NOT_FOUND);
+        } catch (PrimaryIdNullOrEmptyException pinoee) {
+            return new ResponseEntity<>(pinoee.getDefaultMessage(), HttpStatus.BAD_REQUEST);
+        }catch (UserNotFoundException unfe){
+            return new ResponseEntity<>(unfe.getDefaultMessage(), HttpStatus.NOT_FOUND);
+        }
+
     }
 
 

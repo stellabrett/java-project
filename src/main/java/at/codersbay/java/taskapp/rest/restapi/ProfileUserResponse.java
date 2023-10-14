@@ -11,11 +11,24 @@ public class ProfileUserResponse {
 
  private User user;
  private Profile profile;
+ private String errorMessage;
 
 
     public ProfileUserResponse(User user,  Profile profile) {
         this.user = user;
         this.profile = profile;
+    }
+
+    public ProfileUserResponse(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     public User getUser() {
