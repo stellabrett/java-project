@@ -292,13 +292,30 @@ public class ApplicationController {
         try {
             profileService.updateProfileAndUser(id, param);
             return new ResponseEntity<>("Profile and User updated successfully", HttpStatus.OK);
-        } catch (ProfileNotFoundException pnf) {
-            return new ResponseEntity<>(pnf.getDefaultMessage(), HttpStatus.NOT_FOUND);
+        } catch (ProfileNotFoundException pnfe) {
+            return new ResponseEntity<>(pnfe.getDefaultMessage(), HttpStatus.NOT_FOUND);
         } catch (PrimaryIdNullOrEmptyException pinoee) {
             return new ResponseEntity<>(pinoee.getDefaultMessage(), HttpStatus.BAD_REQUEST);
         }catch (UserNotFoundException unfe){
             return new ResponseEntity<>(unfe.getDefaultMessage(), HttpStatus.NOT_FOUND);
         }
+
+    }
+
+    @DeleteMapping("/profiles/{id}")
+    public ResponseEntity<String>deleteProfileById(
+            @PathVariable Long id,
+            @RequestParam(value = "deleteUser", required = false, defaultValue = "false" ) boolean deleteUser){
+            try {
+            profileService.deleteProfileById(id, deleteUser);
+            return new ResponseEntity<>("successfully deleted", HttpStatus.OK);
+            }catch (ProfileNotFoundException pnfe) {
+                return new ResponseEntity<>(pnfe.getDefaultMessage(), HttpStatus.NOT_FOUND);
+            } catch (PrimaryIdNullOrEmptyException pinoee) {
+                return new ResponseEntity<>(pinoee.getDefaultMessage(), HttpStatus.BAD_REQUEST);
+            }catch (UserNotFoundException unfe){
+                return new ResponseEntity<>(unfe.getDefaultMessage(), HttpStatus.NOT_FOUND);
+            }
 
     }
 

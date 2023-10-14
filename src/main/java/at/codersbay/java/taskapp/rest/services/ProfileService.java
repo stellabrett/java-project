@@ -154,6 +154,25 @@ public class ProfileService {
         userDAO.save(user);
     }
 
+    @Transactional
+    public void deleteProfileById(Long profileId, boolean deleteUser)
+            throws PrimaryIdNullOrEmptyException,ProfileNotFoundException, UserNotFoundException{
+        if(profileId == null){
+            throw new PrimaryIdNullOrEmptyException();
+        }
+
+        Profile profile = profileDAO.findById(profileId)
+                .orElseThrow(() -> new ProfileNotFoundException());
+
+        if(deleteUser){
+            User user = profile.getUser();
+            if(user != null){
+                userDAO.delete(user);
+            }
+        }
+        profileDAO.delete(profile);
+    }
+
 
 
 
