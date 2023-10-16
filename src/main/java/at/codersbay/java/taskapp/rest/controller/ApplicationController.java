@@ -367,9 +367,19 @@ public class ApplicationController {
 
 //////////////// tasks
 
+    //TODO Gibt 400 Bad request..seriously
     /**
-     * @param param
-     * @return
+     *
+     * Api endpoint for creating a new task based on the parameters passed and assigns it to the specified users.
+     *
+     * HTTP request method: POST
+     * Path: /task
+     *
+     * @param param input parameter containig the information of the task
+     * @return HTTP status 200 (OK) and a success message and true,
+     * HTTP status 404 (Not Found) if the user was not found , error message, false
+     * HTTP status 500 (Bad Request)if the user id is null or empty,error, message, false
+     * otherwise HTTP status 500 (Bad Request)
      */
     @PostMapping("/task")
     public ResponseEntity<RestApiResponse> createTask(@RequestBody TaskInputParam param) {

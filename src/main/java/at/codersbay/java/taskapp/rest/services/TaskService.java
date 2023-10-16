@@ -31,6 +31,18 @@ public class TaskService {
 
     }
 
+    /**
+     * This method creates a task and assigns it to the specified users
+     *
+     * @param userIds
+     * @param title
+     * @param description
+     * @param deadline
+     * @param completed
+     * @return true if the task was successfully created and assigned to users, otherwise false
+     * @throws PrimaryIdNullOrEmptyException when the id is null
+     * @throws UserNotFoundException when the user is not found
+     */
     public boolean createTask(Set<Long> userIds, String title, String description, LocalDate deadline, boolean completed)
             throws PrimaryIdNullOrEmptyException, UserNotFoundException {
         if (userIds == null || userIds.isEmpty()) {
@@ -47,9 +59,6 @@ public class TaskService {
             User user = userDAO.findById(userId).orElseThrow(() -> new UserNotFoundException("user not found", userId));
             user.getTasks().add(task);
         }
-        //Set<Task> userTask = user.getTasks();
-        //userTask.add(task);
-        //user.getTasks().add(task);
         taskDAO.save(task);
 
         return true;
