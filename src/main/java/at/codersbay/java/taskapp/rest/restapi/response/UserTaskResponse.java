@@ -1,4 +1,4 @@
-package at.codersbay.java.taskapp.rest.restapi;
+package at.codersbay.java.taskapp.rest.restapi.response;
 
 import at.codersbay.java.taskapp.rest.entities.Profile;
 import at.codersbay.java.taskapp.rest.entities.Task;
@@ -12,12 +12,25 @@ public class UserTaskResponse {
  private User user;
  private Set<Task> tasks;
 
- private Profile profile;
 
-    public UserTaskResponse(User user, Set<Task> tasks, Profile profile) {
+ private String errorMessage;
+
+
+    public UserTaskResponse(User user, Set<Task> tasks ) {
         this.user = user;
         this.tasks = tasks;
-        this.profile = profile;
+
+    }
+    public UserTaskResponse(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
 
     public User getUser() {
@@ -36,11 +49,6 @@ public class UserTaskResponse {
         this.tasks = tasks;
     }
 
-    public Profile getProfile() {
-        return profile;
-    }
 
-    public void setProfile(Profile profile) {
-        this.profile = profile;
-    }
+
 }

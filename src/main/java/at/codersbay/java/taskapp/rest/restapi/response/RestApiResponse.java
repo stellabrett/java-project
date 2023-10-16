@@ -1,4 +1,4 @@
-package at.codersbay.java.taskapp.rest.restapi;
+package at.codersbay.java.taskapp.rest.restapi.response;
 
 public class RestApiResponse {
 

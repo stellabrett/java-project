@@ -1,5 +1,6 @@
 package at.codersbay.java.taskapp.rest.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
@@ -32,7 +33,7 @@ public class Task {
     private LocalDate  deadline;
 
     private boolean completed;
-
+    @JsonIgnore
     @ManyToMany(mappedBy = "tasks")
     private Set<User> users;
 public Task(){

@@ -3,16 +3,13 @@ package at.codersbay.java.taskapp.rest.services;
 import at.codersbay.java.taskapp.rest.dao.ProfileDAO;
 import at.codersbay.java.taskapp.rest.dao.UserDAO;
 import at.codersbay.java.taskapp.rest.entities.Profile;
-import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
 import at.codersbay.java.taskapp.rest.exceptions.EntityNotFoundException;
 import at.codersbay.java.taskapp.rest.exceptions.PrimaryIdNullOrEmptyException;
 import at.codersbay.java.taskapp.rest.exceptions.ProfileNotFoundException;
 import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
-import at.codersbay.java.taskapp.rest.restapi.ProfileInputParam;
 import at.codersbay.java.taskapp.rest.restapi.ProfileUserInputParam;
-import at.codersbay.java.taskapp.rest.restapi.ProfileUserResponse;
-import at.codersbay.java.taskapp.rest.restapi.UserInputParam;
+import at.codersbay.java.taskapp.rest.restapi.response.ProfileUserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -5,16 +5,19 @@ import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
 import at.codersbay.java.taskapp.rest.exceptions.*;
 import at.codersbay.java.taskapp.rest.restapi.*;
+import at.codersbay.java.taskapp.rest.restapi.response.ProfileUserResponse;
+import at.codersbay.java.taskapp.rest.restapi.response.RestApiResponse;
+import at.codersbay.java.taskapp.rest.restapi.response.UserTaskResponse;
 import at.codersbay.java.taskapp.rest.services.ProfileService;
 import at.codersbay.java.taskapp.rest.services.TaskService;
 import at.codersbay.java.taskapp.rest.services.UserService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -31,73 +34,88 @@ public class ApplicationController {
 
 
     /////////////////////////////// User
-
+//TODO add verknüpfen mit profil, ERROR NonUniqueResultException
     /**
-     * add a new User
+     * API endpoint to add a new User
+     *
+     * HTTP request method: POST
+     * Path: /addUser
      *
      * @param user (firstname, lastname, email)
-     * @return the saved User
+     * @return HTTP status 200 (OK) and the saved user
+     * HTTP status 500 (Bad Request) if the user already exists
+     *
      */
-    @PostMapping("addUser")
-    public User addUser(@RequestBody User user) {
-        return userService.addUser(user);
+    @PostMapping("/users")
+    public ResponseEntity<?> addUser (@RequestBody User user) throws IllegalArgumentException {
+        try {
+            User newUser = userService.addUser(user);
+            return new ResponseEntity<>(newUser, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The email address is already registered");
+        }
     }
 
+
+
     /**
-     * get all users incl. their profiles and tasks
+     * API endpoint to get a list of all users incl. their profiles and tasks
      *
-     * @return all users
+     * HTTP request method: GET
+     * Path: /users
+     *
+     * @return HTTP status 200 (OK) and all users,
+     * HTTP status 404 (NOT FOUND) if no user was found
      */
     @GetMapping("/users")
     public ResponseEntity<List<UserTaskResponse>> getUsers() {
         try {
             List<UserTaskResponse> userTaskResponses = userService.getUsers();
             return new ResponseEntity<>(userTaskResponses, HttpStatus.OK);
-        } catch (EntityNotFoundException e) {
+        } catch (UserNotFoundException unfe) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
     }
 
 
-
-    //TODO show tasks
-
     /**
-     * @param id
-     * @return a user incl.profile and tasks
+     * API endpoint to find a user by id, including their profile and tasks
+     *
+     * HTTP request method: GET
+     * Path: /users/{id}
+     *
+     * @param id user Id
+     * @return HTTP status 200 (OK) and the user,
+     * HTTP status 500 (Bad Request) and a message,
+     * HTTP status 404 (Not found) and a message
      */
-    @GetMapping("/userById/{id}")
-    public ResponseEntity<RestApiResponse> getUserById(@PathVariable Long id) {
-        HttpStatus status = null;
-        String message = "";
-        User user = null;
-
+    @GetMapping("/users/{id}")
+    public ResponseEntity <UserTaskResponse> getUserById(@PathVariable Long id) {
         try {
-            user = this.userService.getUserById(id);
-            status = HttpStatus.OK;
-
+            UserTaskResponse userTaskResponse = userService.getUserById(id);
+            return new ResponseEntity<>(userTaskResponse, HttpStatus.OK);
         } catch (PrimaryIdNullOrEmptyException pinoee) {
-            message = pinoee.getDefaultMessage();
-            status = HttpStatus.BAD_REQUEST;
-
+            return new ResponseEntity<>(new UserTaskResponse(pinoee.getDefaultMessage()), HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException unfe) {
-            message = unfe.getDefaultMessage();
-            status = HttpStatus.NOT_FOUND;
+            return new ResponseEntity<>(new UserTaskResponse(unfe.getDefaultMessage()), HttpStatus.NOT_FOUND);
         }
-        RestApiResponse response = new RestApiResponse(message, user);
-        return new ResponseEntity<>(response, status);
     }
 
 
-    //TODO tasks
 
     /**
-     * finds a user by email
+     * API endpoint to find a user by email, including their profile and tasks
      *
-     * @param email
-     * @return a user incl. profile und  tasks
+     * HTTP request method: GET
+     * Path: /users/userByEmail/{email}
+     *
+     * @param email the email address of the user
+     * @return HTTP status 200 (OK) and the user,
+     * HTTP status 500 (Bad Request) and a message,
+     * HTTP status 404 (Not found) and a message
      */
-    @GetMapping("/userByEmail/{email}")
+
+    @GetMapping("/users/userByEmail/{email}")
     public ResponseEntity<RestApiResponse> getUserByEmail(@PathVariable String email) {
         HttpStatus status = null;
         String message = "";
@@ -122,14 +140,17 @@ public class ApplicationController {
 
 
     /**
-     * update user information and their profile
+     * API endpoint to update a user based on the given id,  including associated profile, if there is one.
      *
-     * @param id
-     * @param updatedUser
-     * @return status message
+     * HTTP request method: PUT
+     * Path: /users/{id}
+     *
+     * @param id the id of the user to update
+     * @param updatedUser a JSON containing the updated infos and optional the profile infos
+     * @return A ResponseEntity with a RestApiResponse object containing status and a message
      */
 
-    @PutMapping("/user/{id}")
+    @PutMapping("/users/{id}")
     public ResponseEntity<RestApiResponse> updateUser(
             @PathVariable Long id,
             @RequestBody User updatedUser
@@ -161,29 +182,42 @@ public class ApplicationController {
     }
 
     /**
-     * Delete user by id
+     * API endpoint to delete a user and deletes him from his tasks
      *
-     * @param id
-     * @return true and a message
+     * HTTP request method: PUT
+     * Path: user/{id}
+     *
+     * @param id the id of the user to delete
+     * @return HTTP status 200 (OK) true and a message,
+     *      * HTTP status 500 (Bad Request) and a message,
+     *      * HTTP status 404 (Not found) false, and a message
      */
+
+    //TODO fängt nicht ab wenn keine Id im postman geschickt wird?
     @DeleteMapping("user/{id}")
-    ResponseEntity<RestApiResponse> deleteUser(@PathVariable Long id) {
+    ResponseEntity<RestApiResponse> deleteUser(@PathVariable(required = false) Long id) {
         HttpStatus status = null;
         String message = "";
         boolean result = false;
 
-        try {
-            result = userService.deleteUser(id);
-            status = HttpStatus.OK;
-            message = "User succsessfully deleted";
-
-        } catch (UserNotFoundException unfe) {
-            message = unfe.getDefaultMessage();
-            status = HttpStatus.NOT_FOUND;
-
-        } catch (PrimaryIdNullOrEmptyException pinoee) {
-            message = pinoee.getDefaultMessage();
+        if(id == null){
             status = HttpStatus.BAD_REQUEST;
+            message = " please enter your id";
+        }else {
+
+            try {
+                result = userService.deleteUser(id);
+                status = HttpStatus.OK;
+                message = "User succsessfully deleted";
+
+            } catch (UserNotFoundException unfe) {
+                message = unfe.getDefaultMessage();
+                status = HttpStatus.NOT_FOUND;
+
+            } catch (PrimaryIdNullOrEmptyException pinoee) {
+                message = pinoee.getDefaultMessage();
+                status = HttpStatus.BAD_REQUEST;
+            }
         }
         RestApiResponse response = new RestApiResponse(message, result);
         return new ResponseEntity<>(response, status);
