@@ -7,6 +7,7 @@ import at.codersbay.java.taskapp.rest.exceptions.*;
 import at.codersbay.java.taskapp.rest.restapi.*;
 import at.codersbay.java.taskapp.rest.restapi.response.ProfileUserResponse;
 import at.codersbay.java.taskapp.rest.restapi.response.RestApiResponse;
+import at.codersbay.java.taskapp.rest.restapi.response.TaskUserResponse;
 import at.codersbay.java.taskapp.rest.restapi.response.UserTaskResponse;
 import at.codersbay.java.taskapp.rest.services.ProfileService;
 import at.codersbay.java.taskapp.rest.services.TaskService;
@@ -411,47 +412,62 @@ public class ApplicationController {
     }
 
     /**
-     * get all tasks
-     * @return  all tasks incl associated User
+     * API endpoint to get all Tasks including the associated users
+     *
+     * HTTP request method: DELETE
+     * Path: /tasks
+     *
+     * @return  HTTP status 200 (OK) and all tasks
      */
     @GetMapping("/tasks")
-    public ResponseEntity<List<Task>> getTasks() {
-        List<Task> tasks = taskService.getTasks();
-        return new ResponseEntity<>(tasks, HttpStatus.OK);
+    public ResponseEntity<List<TaskUserResponse>> getTasks() {
+
+            List<TaskUserResponse> taskUserResponses = taskService.getTasks();
+            return new ResponseEntity<>(taskUserResponses, HttpStatus.OK);
+
     }
 
+    //TODO Profile werden angezeigt...bitte kein @JSONIgnore mehr
     /**
-     * get Task by Id and the associated User
-     * @param id
-     * @return a message and the object with the task and the associated User
+     * API endpoint to get all tasks and their associated users
+     *
+     * HTTP request method: GET
+     * Path: /task/{id}
+     *
+     * @param id th task id
+     * @return HTTP status 200 (OK) and the task
+     * HTTP status 404 (Not Found)a message and null,
+     * HTTP status 500 (Bad Request) a message and null
      */
     @GetMapping("/task/{id}")
-    public ResponseEntity<RestApiResponse> getTaskById(@PathVariable Long id){
-        HttpStatus status = null;
-        String message = "";
-        Task task= null;
+    public ResponseEntity<TaskUserResponse> getTaskById(@PathVariable Long id) {
+        TaskUserResponse response = new TaskUserResponse();
 
-        try{
-            task = taskService.getTaskById(id);
-            status = HttpStatus.OK;
-            message = " ein task bitteeeschen";
-        } catch (PrimaryIdNullOrEmptyException pinoee){
-            status = HttpStatus.BAD_REQUEST;
-            message = pinoee.getDefaultMessage();
-        }catch (EntityNotFoundException enfe){
-            status = HttpStatus.NOT_FOUND;
-            message = enfe.getDefaultMessage();
+        try {
+            response = taskService.getTaskById(id);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (PrimaryIdNullOrEmptyException pinoee) {
+            response.setErrorMessage(pinoee.getDefaultMessage());
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        } catch (TaskNotFoundException enfe) {
+            response.setErrorMessage(enfe.getDefaultMessage());
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
         }
-
-        RestApiResponse response = new RestApiResponse(message, task);
-        return new ResponseEntity<>(response, status);
     }
 
+    //TODO warum das doofe EntityNotFound
 
     /**
-     * delete Task by Id
-     * @param id
-     * @return message and boolean
+     * Api endpoint for deleting a task based on the id
+     *
+     * HTTP request method: DELETE
+     * Path: /task/{id}
+     *
+     * @param id the task id to be deleted
+     *
+     * @return HTTP status 200 (OK) message and true if the task was deleted
+     * HTTP status 404 (Not Found) message and false
+     * HTTP status 500 (Bad Request) a message and false
      */
     @DeleteMapping("task/{id}")
     ResponseEntity<RestApiResponse> deleteTask(@PathVariable Long id) {
@@ -464,8 +480,8 @@ public class ApplicationController {
             status = HttpStatus.OK;
             message = "Task succsessfully deleted";
 
-        } catch (EntityNotFoundException enfe) {
-            message = enfe.getDefaultMessage();
+        } catch (TaskNotFoundException tnfe) {
+            message = tnfe.getDefaultMessage();
             status = HttpStatus.NOT_FOUND;
 
         } catch (PrimaryIdNullOrEmptyException pinoee) {
@@ -485,7 +501,8 @@ public class ApplicationController {
      *
      * @param taskId task id
      * @param param the input parameters, containing the updated task and user Ids
-     * @return
+     * @return HTTP status 200 (OK) and the updated task
+     * HTTP status 404 (Not Found) Task not found
      */
     @PutMapping("/tasks/{taskId}")
     public ResponseEntity<?> updateTask(

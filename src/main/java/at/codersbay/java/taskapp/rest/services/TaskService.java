@@ -8,6 +8,8 @@ import at.codersbay.java.taskapp.rest.entities.User;
 import at.codersbay.java.taskapp.rest.exceptions.*;
 import at.codersbay.java.taskapp.rest.restapi.ProfileUserInputParam;
 import at.codersbay.java.taskapp.rest.restapi.TaskUserInputParam;
+import at.codersbay.java.taskapp.rest.restapi.response.TaskUserResponse;
+import at.codersbay.java.taskapp.rest.restapi.response.UserTaskResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
@@ -34,7 +36,6 @@ public class TaskService {
         if (userIds == null || userIds.isEmpty()) {
             throw new PrimaryIdNullOrEmptyException("user Ids are null or empty");
         }
-        // Set<User> user = new HashSet<>();
 
         Task task = new Task();
         task.setTitle(title);
@@ -56,21 +57,32 @@ public class TaskService {
     }
 
     /**
-     * Get all Tasks
+     * Retrieves a list of all tasks along with their associated users
      *
-     * @return all Tasks incl associated user
+     * @return  list of TaskUserResponse objects containing tasks, users, and error messages (if any)
      */
-    public List<Task> getTasks() {
-        return taskDAO.findAll();
+    public List<TaskUserResponse> getTasks() {
+        List<Task> tasks = taskDAO.findAll();
+        List<TaskUserResponse> taskResponses = new ArrayList<>();
+
+        for (Task task : tasks) {
+            Set<User> users = task.getUsers();
+            TaskUserResponse response = new TaskUserResponse(task, users,null);
+            taskResponses.add(response);
+        }
+
+        return taskResponses;
     }
 
+
     /**
-     * @param id
-     * @return task
-     * @throws PrimaryIdNullOrEmptyException
-     * @throws EntityNotFoundException
+     * This method finds a task in the database using the passed ID including all associated users
+     * @param id task id
+     * @return task and associated user
+     * @throws PrimaryIdNullOrEmptyException when the id is null
+     * @throws TaskNotFoundException when the task based on this id is not found
      */
-    public Task getTaskById(Long id) throws PrimaryIdNullOrEmptyException, EntityNotFoundException {
+    public TaskUserResponse getTaskById(Long id) throws PrimaryIdNullOrEmptyException, TaskNotFoundException {
         if (id == null) {
             throw new PrimaryIdNullOrEmptyException();
         }
@@ -78,22 +90,24 @@ public class TaskService {
         Optional<Task> taskOptional = taskDAO.findById(id);
 
         if (taskOptional.isPresent()) {
-            return taskOptional.get();
-        }
-        throw new EntityNotFoundException();
+            Task task = taskOptional.get();
+            Set<User> users = task.getUsers();
 
+            return new TaskUserResponse(task, users, null);
+        }
+        throw new TaskNotFoundException();
     }
 
     /**
-     * delete Task  by  Id
+     * This method deletes a task based on the passed id
      *
-     * @param id
-     * @return boolean
-     * @throws PrimaryIdNullOrEmptyException
-     * @throws EntityNotFoundException
+     * @param id the id of the task to be deleted
+     * @return boolean true if the task is deleted, false if not
+     * @throws PrimaryIdNullOrEmptyException when the id is null
+     * @throws TaskNotFoundException when the Task is not found
      */
 
-    public boolean deleteTask(Long id) throws PrimaryIdNullOrEmptyException, EntityNotFoundException {
+    public boolean deleteTask(Long id) throws PrimaryIdNullOrEmptyException, TaskNotFoundException {
 
         if (id == null) {
             throw new PrimaryIdNullOrEmptyException("given id is null.");
@@ -113,17 +127,22 @@ public class TaskService {
 
             this.taskDAO.delete(task);
         } catch (NoSuchElementException nsee) {
-            throw new EntityNotFoundException("could not found task with given id.", id);
-        }
-
-        try {
-            task = this.taskDAO.findById(id).get();
-        } catch (NoSuchElementException nsee) {
-            return true;
+            throw new TaskNotFoundException("could not found task with given id.", id);
         }
 
         return false;
     }
+
+    /**
+     * This method update a task based on the id and the JSON with the updated Infos
+     *
+     * @param taskId the id of the task to be updated
+     * @param param a JSON Object with the updated task
+     * @return If successful, the updated task
+     * @throws PrimaryIdNullOrEmptyException when the given id is null
+     * @throws TaskNotFoundException when the task is not found
+     * @throws UserNotFoundException when the user is not found
+     */
 
     @Transactional
     public Task updateTask(Long taskId, TaskUserInputParam param)
