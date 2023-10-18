@@ -5,10 +5,7 @@ import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
 import at.codersbay.java.taskapp.rest.exceptions.*;
 import at.codersbay.java.taskapp.rest.restapi.*;
-import at.codersbay.java.taskapp.rest.restapi.response.ProfileUserResponse;
-import at.codersbay.java.taskapp.rest.restapi.response.RestApiResponse;
-import at.codersbay.java.taskapp.rest.restapi.response.TaskUserResponse;
-import at.codersbay.java.taskapp.rest.restapi.response.UserTaskResponse;
+import at.codersbay.java.taskapp.rest.restapi.response.*;
 import at.codersbay.java.taskapp.rest.services.ProfileService;
 import at.codersbay.java.taskapp.rest.services.TaskService;
 import at.codersbay.java.taskapp.rest.services.UserService;
@@ -19,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -71,12 +69,12 @@ public class ApplicationController {
      * HTTP status 404 (NOT FOUND) if no user was found
      */
     @GetMapping("/users")
-    public ResponseEntity<List<UserTaskResponse>> getUsers() {
+    public ResponseEntity<List<UserProfileTaskResponse>> getUsers() {
         try {
-            List<UserTaskResponse> userTaskResponses = userService.getUsers();
-            return new ResponseEntity<>(userTaskResponses, HttpStatus.OK);
+            List<UserProfileTaskResponse> userProfileTaskResponses = userService.getUsers();
+            return new ResponseEntity<>(userProfileTaskResponses, HttpStatus.OK);
         } catch (UserNotFoundException unfe) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(Collections.singletonList(new UserProfileTaskResponse(unfe.getDefaultMessage())), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -92,15 +90,16 @@ public class ApplicationController {
      * HTTP status 500 (Bad Request) and a message,
      * HTTP status 404 (Not found) and a message
      */
+
     @GetMapping("/users/{id}")
-    public ResponseEntity <UserTaskResponse> getUserById(@PathVariable Long id) {
+    public ResponseEntity <UserProfileTaskResponse> getUserById(@PathVariable Long id) {
         try {
-            UserTaskResponse userTaskResponse = userService.getUserById(id);
-            return new ResponseEntity<>(userTaskResponse, HttpStatus.OK);
+            UserProfileTaskResponse userProfileTaskResponse = userService.getUserById(id);
+            return new ResponseEntity<>(userProfileTaskResponse, HttpStatus.OK);
         } catch (PrimaryIdNullOrEmptyException pinoee) {
-            return new ResponseEntity<>(new UserTaskResponse(pinoee.getDefaultMessage()), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new UserProfileTaskResponse(pinoee.getDefaultMessage()), HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException unfe) {
-            return new ResponseEntity<>(new UserTaskResponse(unfe.getDefaultMessage()), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(new UserProfileTaskResponse(unfe.getDefaultMessage()), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -119,26 +118,16 @@ public class ApplicationController {
      */
 
     @GetMapping("/users/userByEmail/{email}")
-    public ResponseEntity<RestApiResponse> getUserByEmail(@PathVariable String email) {
-        HttpStatus status = null;
-        String message = "";
-        User user = null;
-
+    public ResponseEntity<UserProfileTaskResponse> getUserByEmail(@PathVariable String email) {
         try {
-            user = this.userService.getUserByEmail(email);
-            status = HttpStatus.OK;
-            message = "e voila";
-
+            UserProfileTaskResponse userProfileTaskResponse = this.userService.getUserByEmail(email);
+            return new ResponseEntity<>(userProfileTaskResponse, HttpStatus.OK);
         } catch (PrimaryIdNullOrEmptyException pinoee) {
-            message = pinoee.getDefaultMessage();
-            status = HttpStatus.BAD_REQUEST;
-
+           return new ResponseEntity<>(new UserProfileTaskResponse(pinoee.getDefaultMessage()),HttpStatus.BAD_REQUEST);
         } catch (UserNotFoundException unfe) {
-            message = unfe.getDefaultMessage();
-            status = HttpStatus.NOT_FOUND;
+          return new ResponseEntity<>(new UserProfileTaskResponse(unfe.getDefaultMessage()), HttpStatus.NOT_FOUND);
         }
-        RestApiResponse response = new RestApiResponse(message, user);
-        return new ResponseEntity<>(response, status);
+
     }
 
 
@@ -150,7 +139,7 @@ public class ApplicationController {
      *
      * @param id the id of the user to update
      * @param updatedUser a JSON containing the updated infos and optional the profile infos
-     * @return A ResponseEntity with a RestApiResponse object containing status and a message
+     * @return HTTP status 200 (OK)  the entity with the updated user,and a message
      */
 
     @PutMapping("/users/{id}")
@@ -158,32 +147,22 @@ public class ApplicationController {
             @PathVariable Long id,
             @RequestBody User updatedUser
     ) {
-        HttpStatus status = null;
-        String message = "";
-        User resultUser = null;
 
         try {
             User updated = this.userService.updateUser(id, updatedUser);
-            if (updated != null) {
 
-                status = HttpStatus.OK;
-                message = "e voila";
-                resultUser = updated;
-            } else {
-                status = HttpStatus.BAD_REQUEST;
-                message = "update user failed";
-            }
+            HttpStatus status = HttpStatus.OK;
+            String message = "updated successfully";
+            RestApiResponse response = new RestApiResponse(message, null);
+            return new ResponseEntity<>(response, status);
         } catch (UserNotFoundException unfe) {
-            message = unfe.getDefaultMessage();
-            status = HttpStatus.NOT_FOUND;
+            return new ResponseEntity<>(new RestApiResponse(unfe.getDefaultMessage(), null), HttpStatus.NOT_FOUND);
         } catch (PrimaryIdNullOrEmptyException pinoee) {
-            message = pinoee.getDefaultMessage();
-            status = HttpStatus.BAD_REQUEST;
+            return new ResponseEntity<>(new RestApiResponse(pinoee.getDefaultMessage(), null), HttpStatus.BAD_REQUEST);
         }
-        RestApiResponse response = new RestApiResponse(message, resultUser);
-        return new ResponseEntity<>(response, status);
     }
 
+    //TODO fängt nicht ab wenn keine id geschcikt wird
     /**
      * API endpoint to delete a user and deletes him from his tasks
      *
@@ -196,14 +175,13 @@ public class ApplicationController {
      *      * HTTP status 404 (Not found) false, and a message
      */
 
-    //TODO fängt nicht ab wenn keine Id im postman geschickt wird?
     @DeleteMapping("user/{id}")
     ResponseEntity<RestApiResponse> deleteUser(@PathVariable(required = false) Long id) {
         HttpStatus status = null;
         String message = "";
         boolean result = false;
 
-        if(id == null){
+        if(id == null || id <= 0){
             status = HttpStatus.BAD_REQUEST;
             message = " please enter your id";
         }else {
@@ -294,7 +272,7 @@ public class ApplicationController {
         }
     }
 
-//TODO ebenfalls doppelt profile
+
     /**
      * API endpoint to query a profile by user id
      *
@@ -438,16 +416,18 @@ public class ApplicationController {
      * Path: /tasks
      *
      * @return  HTTP status 200 (OK) and all tasks
-     */
+     * HTTP status 404 (Not found) and an empty object if no tasks were found
+     * */
     @GetMapping("/tasks")
     public ResponseEntity<List<TaskUserResponse>> getTasks() {
-
+        try{
             List<TaskUserResponse> taskUserResponses = taskService.getTasks();
             return new ResponseEntity<>(taskUserResponses, HttpStatus.OK);
-
+        }catch (TaskNotFoundException tnfe) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
-    //TODO Profile werden angezeigt...bitte kein @JSONIgnore mehr
     /**
      * API endpoint to get all tasks and their associated users
      *
@@ -475,7 +455,6 @@ public class ApplicationController {
         }
     }
 
-    //TODO warum das doofe EntityNotFound
 
     /**
      * Api endpoint for deleting a task based on the id
@@ -512,7 +491,7 @@ public class ApplicationController {
         return new ResponseEntity<>(response, status);
     }
 
-    //TODO ERROR HAndling
+
     /**
      * Api endpoint for updating a task by its it and optional its users
      *
@@ -522,7 +501,7 @@ public class ApplicationController {
      * @param taskId task id
      * @param param the input parameters, containing the updated task and user Ids
      * @return HTTP status 200 (OK) and the updated task
-     * HTTP status 404 (Not Found) Task not found
+     * HTTP status 404 (Not Found) and a message: Task not found
      */
     @PutMapping("/tasks/{taskId}")
     public ResponseEntity<?> updateTask(

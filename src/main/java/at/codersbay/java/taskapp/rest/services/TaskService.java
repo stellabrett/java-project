@@ -62,16 +62,22 @@ public class TaskService {
         taskDAO.save(task);
 
         return true;
-
     }
 
+
+// TODO error handling nochmal
     /**
      * Retrieves a list of all tasks along with their associated users
      *
      * @return  list of TaskUserResponse objects containing tasks, users, and error messages (if any)
      */
-    public List<TaskUserResponse> getTasks() {
+    public List<TaskUserResponse> getTasks() throws TaskNotFoundException {
         List<Task> tasks = taskDAO.findAll();
+
+
+        if (tasks.isEmpty()){
+            throw new TaskNotFoundException("No tasks were found", null);
+        }
         List<TaskUserResponse> taskResponses = new ArrayList<>();
 
         for (Task task : tasks) {
@@ -79,7 +85,6 @@ public class TaskService {
             TaskUserResponse response = new TaskUserResponse(task, users,null);
             taskResponses.add(response);
         }
-
         return taskResponses;
     }
 
@@ -116,6 +121,7 @@ public class TaskService {
      * @throws TaskNotFoundException when the Task is not found
      */
 
+    // TODO reza fragen warum ich nsee werfen muss
     public boolean deleteTask(Long id) throws PrimaryIdNullOrEmptyException, TaskNotFoundException {
 
         if (id == null) {
@@ -175,7 +181,6 @@ public class TaskService {
             for (Long userId : newUserIds) {
                 User user = userDAO.findById(userId)
                         .orElseThrow(() -> new UserNotFoundException());
-
 
                 user.getTasks().add(existingTask);
                 updatedUsers.add(user);

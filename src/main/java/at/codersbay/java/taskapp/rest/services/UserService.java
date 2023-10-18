@@ -7,6 +7,7 @@ import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
 import at.codersbay.java.taskapp.rest.exceptions.PrimaryIdNullOrEmptyException;
 import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
+import at.codersbay.java.taskapp.rest.restapi.response.UserProfileTaskResponse;
 import at.codersbay.java.taskapp.rest.restapi.response.UserTaskResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
@@ -61,21 +62,21 @@ public class UserService {
      * @throws UserNotFoundException when no user is found
      */
 
-    public List<UserTaskResponse> getUsers() throws UserNotFoundException {
+    public List<UserProfileTaskResponse> getUsers() throws UserNotFoundException {
         List<User> users = userDAO.findAll();
-        List<UserTaskResponse> userTaskResponses = new ArrayList<>();
+        List<UserProfileTaskResponse> userProfileTaskResponses = new ArrayList<>();
 
         for (User user : users) {
             Set<Task> tasks = user.getTasks();
             Profile profile = user.getProfile();
-            userTaskResponses.add(new UserTaskResponse(user, tasks));
+            userProfileTaskResponses.add(new UserProfileTaskResponse(user, tasks, profile));
         }
 
-        if (userTaskResponses.isEmpty()) {
+        if (userProfileTaskResponses.isEmpty()) {
             throw new UserNotFoundException();
         }
 
-        return userTaskResponses;
+        return userProfileTaskResponses;
     }
 
     /**
@@ -87,7 +88,7 @@ public class UserService {
      * @throws UserNotFoundException when the user is not found
      */
 
-    public UserTaskResponse getUserById(Long userId) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
+    public UserProfileTaskResponse getUserById(Long userId) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
         if (userId == null) {
             throw new PrimaryIdNullOrEmptyException();
         }
@@ -98,7 +99,8 @@ public class UserService {
            User user = userOptional.get();
 
            Set<Task> tasks = user.getTasks();
-           return new UserTaskResponse(user, tasks );
+           Profile profile = user.getProfile();
+           return new UserProfileTaskResponse(user, tasks, profile);
         } else {
             throw new UserNotFoundException();
         }
@@ -112,7 +114,7 @@ public class UserService {
      * @throws UserNotFoundException when the user is not found
      */
 
-    public User getUserByEmail(String email) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
+    public UserProfileTaskResponse getUserByEmail(String email) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
         if (email == null) {
             throw new PrimaryIdNullOrEmptyException();
         }
@@ -120,7 +122,12 @@ public class UserService {
         Optional<User> userOptional = userDAO.findUserByEmail(email);
 
         if (userOptional.isPresent()) {
-            return userOptional.get();
+            User user = userOptional.get();
+            Set<Task> tasks = user.getTasks();
+            Profile profile = user.getProfile();
+
+            UserProfileTaskResponse response = new UserProfileTaskResponse(user, tasks, profile);
+            return response;
         } else {
             throw new UserNotFoundException();
         }
@@ -158,7 +165,6 @@ public class UserService {
                 existingProfile.setProfilePhoto(updatedProfile.getProfilePhoto());
             }
 
-
             userDAO.save(existingUser);
 
             return existingUser;
@@ -171,12 +177,12 @@ public class UserService {
      * This method deletes a user based on the given id from the database and  from any tasks
      * @param id user id of the user to be deleted
      * @return True if the user was successfully deleted, or false if the user does not exist
-     * @throws PrimaryIdNullOrEmptyException when the id is null
+     * @throws PrimaryIdNullOrEmptyException when the id is null or empty
      * @throws UserNotFoundException when the user is not found
      */
     public boolean deleteUser (Long id) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
 
-        if (id == null) {
+        if (id == null || id <= 0) {
             throw new PrimaryIdNullOrEmptyException();
         }
 
