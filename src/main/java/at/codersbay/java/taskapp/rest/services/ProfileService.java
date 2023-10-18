@@ -37,37 +37,38 @@ public class ProfileService {
     }
 
     /**
-     *
-     * @param userId
-     * @param bio
-     * @param profilePhoto
-     * @return boolean
-     * @throws PrimaryIdNullOrEmptyException
-     * @throws UserNotFoundException
+     * This method creates a new profile and saves it to the database. If a user is specified, the profile is assigned to this
+     * @param userId optional user id for which the profile is created
+     * @param bio Bio information
+     * @param profilePhoto the Url for the profile photo
+     * @return boolean true if the profile was created successfully, false if not
+     * @throws PrimaryIdNullOrEmptyException when the given id is null
+     * @throws UserNotFoundException if the user with the given id, is not found
      */
 
-    public boolean createProfile(Long userId, String bio, String profilePhoto) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
-        if(userId == null){
-            throw new PrimaryIdNullOrEmptyException("given id is null");
+    public boolean createProfile(Long userId, String bio, String profilePhoto) throws  UserNotFoundException {
+        User user = null;
+        if(userId != null) {
+            user = userDAO.findById(userId).orElseThrow(() -> new UserNotFoundException());
         }
-
-        User user = userDAO.findById(userId).orElseThrow(() -> new UserNotFoundException("User not found", userId));
-
         Profile profile = new Profile();
         profile.setBio(bio);
         profile.setProfilePhoto(profilePhoto);
 
-        user.setProfile(profile);
-
-        userDAO.save(user);
+        if(user != null){
+            user.setProfile(profile);
+            userDAO.save(user);
+        }else {
+            profileDAO.save(profile);
+        }
         return true;
 
     }
 
     /**
-     * get all profiles incl. the associated user
-     * @return
-     * @throws EntityNotFoundException
+     * this method reads all profiles incl. the associated user from database
+     * @return a List of profiles and their associated user
+     * @throws EntityNotFoundException when no profiles exist
      */
     public List<ProfileUserResponse> getProfiles()throws EntityNotFoundException{
         List<Profile> profiles = profileDAO.findAll();

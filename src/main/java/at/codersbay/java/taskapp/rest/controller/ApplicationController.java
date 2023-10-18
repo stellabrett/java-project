@@ -230,19 +230,23 @@ public class ApplicationController {
 ///////////////// profile
 
 
-    @PostMapping("/profile")
+   /* @PostMapping("/profile")
     public Profile addProfile(@RequestBody Profile profile) {
         return profileService.addProfile(profile);
-    }
+    } */
 
 
     /**
-     * create a new profile for a existing user
+     * API endpoint to create a new profile for an existing user
      *
-     * @param param userId, bio, profilePhoto as an url
-     * @return user incl. profile
+     * HTTP request method: POST
+     * Path: /profiles
+     *
+     * @param param  a JSON object (optional userId, bio, profilePhoto as an url)
+     * @return HTTP status 200 (OK), true and a message,
+     * HTTP status 404 (Not Found), null and a message if the user was not found
      */
-    @PostMapping("/createProfile")
+    @PostMapping("/profiles")
     public ResponseEntity<RestApiResponse> createProfile(@RequestBody ProfileInputParam param) {
 
         HttpStatus status = null;
@@ -255,9 +259,6 @@ public class ApplicationController {
             status = HttpStatus.OK;
             message = "Profile created successfully";
             responseObject = result;
-        } catch (PrimaryIdNullOrEmptyException pinoee) {
-            message = "please enter a user ID ";
-            status = HttpStatus.BAD_REQUEST;
 
         } catch (UserNotFoundException unfe) {
             message = "user not found";
@@ -270,9 +271,16 @@ public class ApplicationController {
         return new ResponseEntity<>(response, status);
     }
 
+    //TODO gibt profile doppelt
+
     /**
-     * get all profiles incl. the associated user
-     * @return na das selbe...
+     * API endpoint to get all profiles including their users
+     *
+     * HTTP request method: GET
+     * Path: /profiles
+     *
+     * @return HTTP status 200 (OK) and all  profiles incl. associated user,
+     * HTTP status 404 (Not Found) if no profile was found
      */
     @GetMapping("/profiles")
     public ResponseEntity<List<ProfileUserResponse>> getProfiles() {
@@ -284,14 +292,14 @@ public class ApplicationController {
         }
     }
 
-
+//TODO ebenfalls doppelt profile
     /**
-     * API endpoint to query a profile by user Id
+     * API endpoint to query a profile by user id
      *
      * HTTP request method: GET
      * Path: /profiles/{id}
      *
-     * @param id users Id
+     * @param id users id
      * @return HTTP status 200 (OK) and the queried profile incl. associated user,
      * HTTP status 404 (Not Found) if the user was not found
      * HTTP status 500 (Bad Request) if the given id is null
@@ -316,7 +324,7 @@ public class ApplicationController {
      * @param id profileId
      * @param param the input parameters,that containing the updated profile and user infos.
      * @return HTTP status 200 (OK) and a success message
-     * HTTP status 404 (Not Found) if the user was not found , error message
+     * HTTP status 404 (Not Found) if the profile was not found , error message
      * HTTP status 500 (Bad Request) if the given id is null, error message
      */
     @PutMapping("/profiles/{id}")
