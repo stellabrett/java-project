@@ -35,13 +35,18 @@ public class UserService {
      * @return The added user if added successfully
      * @throws DuplicateKeyException if the email address already exists in the database
      */
-    public User addUser(User newUser) throws IllegalArgumentException {
-        Optional<User> existingUser = userDAO.findUserByEmail(newUser.getEmail());
+    public User addUser(User user, Profile profile) throws IllegalArgumentException {
+        Optional<User> existingUser = userDAO.findUserByEmail(user.getEmail());
         if(existingUser.isPresent()){
-            throw new IllegalArgumentException("this email address already exist");
+            throw new IllegalArgumentException();
         }else {
-            userDAO.save(newUser);
-            return newUser;
+            if(profile != null) {
+                user.setProfile(profile);
+                profile.setUser(user);
+            }
+
+            userDAO.save(user);
+            return user;
         }
     }
 

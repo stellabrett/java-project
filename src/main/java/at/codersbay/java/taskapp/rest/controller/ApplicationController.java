@@ -34,23 +34,26 @@ public class ApplicationController {
     private TaskService taskService;
 
 
-    /////////////////////////////// User
-//TODO add verknüpfen mit profil, ERROR NonUniqueResultException
+    //-------------------------------- User ------------------------
+
+
+//TODO profil methode im user service! extra methode ins profiile Service? Ggibt profile null retour
+
     /**
      * API endpoint to add a new User
      *
      * HTTP request method: POST
-     * Path: /addUser
+     * Path: /users
      *
-     * @param user (firstname, lastname, email)
-     * @return HTTP status 200 (OK) and the saved user
-     * HTTP status 500 (Bad Request) if the user already exists
+     * @param user firstname, lastname, email of the new user
+     * @return HTTP status 200 (OK) and the saved user,
+     * HTTP status 500 (Bad Request) if the user already exists and a message
      *
      */
     @PostMapping("/users")
-    public ResponseEntity<?> addUser (@RequestBody User user) throws IllegalArgumentException {
+    public ResponseEntity<?> addUser (@RequestBody User user ,@RequestBody(required = false) Profile profile) throws IllegalArgumentException {
         try {
-            User newUser = userService.addUser(user);
+            User newUser = userService.addUser(user,profile);
             return new ResponseEntity<>(newUser, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The email address is already registered");
@@ -227,7 +230,7 @@ public class ApplicationController {
 
 
 
-///////////////// profile
+///------------------------------ profile ----------------------------
 
 
    /* @PostMapping("/profile")
@@ -373,7 +376,7 @@ public class ApplicationController {
 
 
 
-//////////////// tasks
+//------------------------------- tasks ------------------------------
 
     //TODO Gibt 400 Bad request..seriously
     /**
