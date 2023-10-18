@@ -37,7 +37,6 @@ public class ApplicationController {
     //-------------------------------- User ------------------------
 
 
-//TODO profil methode im user service! extra methode ins profiile Service? Ggibt profile null retour
 
     /**
      * API endpoint to add a new User

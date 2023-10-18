@@ -1,5 +1,6 @@
 package at.codersbay.java.taskapp.rest.services;
 
+import at.codersbay.java.taskapp.rest.dao.ProfileDAO;
 import at.codersbay.java.taskapp.rest.dao.UserDAO;
 import at.codersbay.java.taskapp.rest.entities.Profile;
 import at.codersbay.java.taskapp.rest.entities.Task;
@@ -23,6 +24,8 @@ public class UserService {
     @Autowired
     UserDAO userDAO;
 
+    ProfileDAO profileDAO;
+
     public UserService(){
 
     }
@@ -31,7 +34,7 @@ public class UserService {
     /**
      * This method adds a new user after checking if the email address already exists
      *
-     * @param newUser The new user to be added
+     * @param user The new user to be added
      * @return The added user if added successfully
      * @throws DuplicateKeyException if the email address already exists in the database
      */
@@ -43,6 +46,7 @@ public class UserService {
             if(profile != null) {
                 user.setProfile(profile);
                 profile.setUser(user);
+                profileDAO.save(profile);
             }
 
             userDAO.save(user);
