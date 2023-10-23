@@ -146,45 +146,62 @@ public class TaskService {
      * This method update a task based on the id and the JSON with the updated Infos
      *
      * @param taskId the id of the task to be updated (Path variable)
-     * @param param a JSON Object with the updated task (request body)
+     * @param userIds
+     * @param title
+     * @param description
+     * @param deadline
+     * @param completed
      * @return If successful, the updated task
      * @throws PrimaryIdNullOrEmptyException when the given id is null
      * @throws TaskNotFoundException when the task is not found
      * @throws UserNotFoundException when the user is not found
+     * @throws InvalidDeadlineException when the deadline is before the current date
      */
 
-    //TODO void ?
+
     @Transactional
-    public Task updateTask(Long taskId, TaskUserInputParam param)
-            throws PrimaryIdNullOrEmptyException, TaskNotFoundException, UserNotFoundException {
+    public Task updateTask(Long taskId, Set<Long> userIds, String title, String description, LocalDate deadline, boolean completed)
+            throws PrimaryIdNullOrEmptyException, TaskNotFoundException, UserNotFoundException, InvalidDeadlineException {
         if (taskId == null) {
-            throw new PrimaryIdNullOrEmptyException("miau");
+            throw new PrimaryIdNullOrEmptyException("Task ID is null or empty");
         }
 
         Task existingTask = taskDAO.findById(taskId)
-                .orElseThrow(() -> new TaskNotFoundException("task not found", null));
+                .orElseThrow(() -> new TaskNotFoundException("Task not found", taskId));
 
-        existingTask.setTitle(param.getTitle());
-        existingTask.setDescription(param.getDescription());
-        existingTask.setDeadline(param.getDeadline());
-        existingTask.setCompleted(param.isCompleted());
-
-        if (param.getUserIds() != null && param.getUserIds().isEmpty()) {
-            Set<Long> newUserIds = param.getUserIds();
-            Set<User> updatedUsers = new HashSet<>();
-
-            for (Long userId : newUserIds) {
-                User user = userDAO.findById(userId)
-                        .orElseThrow(() -> new UserNotFoundException());
-
-                user.getTasks().add(existingTask);
-                updatedUsers.add(user);
-            }
-            existingTask.setUsers(updatedUsers);
+        LocalDate currentDate = LocalDate.now();
+        if(deadline.isBefore(currentDate)){
+            throw new InvalidDeadlineException("Please enter a valid Deadline");
         }
-        return taskDAO.save(existingTask);
 
+        existingTask.setTitle(title);
+        existingTask.setDescription(description);
+        existingTask.setDeadline(deadline);
+        existingTask.setCompleted(completed);
+
+        Set<User> existingUsers = existingTask.getUsers();
+        Set<User> updatedUsers = new HashSet<>();
+
+        for (User existingUser : existingUsers) {
+            if (userIds.contains(existingUser.getId())) {
+                updatedUsers.add(existingUser);
+            } else {
+                existingUser.getTasks().remove(existingTask);
+                userDAO.save(existingUser);
+            }
+        }
+
+        for (Long userId : userIds) {
+            User user = userDAO.findById(userId)
+                    .orElseThrow(() -> new UserNotFoundException("User not found", userId));
+            user.getTasks().add(existingTask);
+            updatedUsers.add(user);
+        }
+
+        existingTask.setUsers(updatedUsers);
+        return taskDAO.save(existingTask);
     }
+
 }
 
 

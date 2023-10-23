@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -75,6 +76,8 @@ public class ApplicationController {
             return new ResponseEntity<>(userProfileTaskResponses, HttpStatus.OK);
         } catch (UserNotFoundException unfe) {
             return new ResponseEntity<>(Collections.singletonList(new UserProfileTaskResponse(unfe.getDefaultMessage())), HttpStatus.NOT_FOUND);
+          //  return new ResponseEntity<>(new UserProfileTaskResponse(unfe.getDefaultMessage()), HttpStatus.NOT_FOUND);
+            //return new ResponseEntity<>(new UserProfileTaskResponse("User not found"), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -220,10 +223,6 @@ public class ApplicationController {
 ///------------------------------ profile ----------------------------
 
 
-   /* @PostMapping("/profile")
-    public Profile addProfile(@RequestBody Profile profile) {
-        return profileService.addProfile(profile);
-    } */
 
 
     /**
@@ -319,7 +318,7 @@ public class ApplicationController {
     @PutMapping("/profiles/{id}")
     public ResponseEntity<String> updateProfileAndUser(@PathVariable Long id, @RequestBody ProfileUserInputParam param) {
         try {
-            profileService.updateProfileAndUser(id, param);
+            profileService.updateProfileAndUser(id, param.getBio(), param.getProfilePhoto(), param.getFirstname(), param.getLastname(), param.getEmail());
             return new ResponseEntity<>("Profile and User updated successfully", HttpStatus.OK);
         } catch (ProfileNotFoundException pnfe) {
             return new ResponseEntity<>(pnfe.getDefaultMessage(), HttpStatus.NOT_FOUND);
@@ -502,6 +501,7 @@ public class ApplicationController {
         return new ResponseEntity<>(response, status);
     }
 
+    //TODO da weiter
 
     /**
      * Api endpoint for updating a task by its it and optional its users
@@ -513,7 +513,7 @@ public class ApplicationController {
      * @param param the input parameters, containing the updated task and user Ids
      * @return HTTP status 200 (OK) and the updated task
      * HTTP status 404 (Not Found) and a message: Task not found
-     * HTTP status
+     * HTTP status 400 (Bad Request) when the deadline is invalid
      */
     @PutMapping("/tasks/{taskId}")
     public ResponseEntity<?> updateTask(
@@ -521,7 +521,10 @@ public class ApplicationController {
             @RequestBody TaskUserInputParam param
     ) {
         try {
-            Task updatedTask = taskService.updateTask(taskId, param);
+
+            Task updatedTask = taskService.updateTask(taskId, param.getUserIds(),param.getTitle(),
+                    param.getDescription(), param.getDeadline(), param.isCompleted());
+
             return new ResponseEntity<>(updatedTask, HttpStatus.OK);
         } catch (TaskNotFoundException tnfe) {
             return new ResponseEntity<>(tnfe.getDefaultMessage(), HttpStatus.NOT_FOUND);
@@ -529,6 +532,8 @@ public class ApplicationController {
             return new ResponseEntity<>(unfe.getDefaultMessage(), HttpStatus.NOT_FOUND);
         } catch (PrimaryIdNullOrEmptyException pinoee) {
             return new ResponseEntity<>(pinoee.getDefaultMessage(), HttpStatus.BAD_REQUEST);
+        }catch (InvalidDeadlineException ide){
+            return new ResponseEntity<>(ide. getDefaultMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 

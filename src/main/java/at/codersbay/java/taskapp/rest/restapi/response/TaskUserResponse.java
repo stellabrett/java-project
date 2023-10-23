@@ -8,6 +8,7 @@ import java.util.Set;
 public class TaskUserResponse {
     private Task task;
  private Set<User> user;
+ private  Set<Long> userIds;
 
 
 
@@ -17,7 +18,9 @@ public class TaskUserResponse {
     public TaskUserResponse(Task task, Set<User> user ,String errorMessage) {
         this.user = user;
         this.task = task;
+        this.userIds = userIds;
         this.errorMessage = errorMessage;
+
     }
 
     public TaskUserResponse(){
@@ -45,5 +48,13 @@ public class TaskUserResponse {
 
     public void setErrorMessage(String errorMessage) {
         this.errorMessage = errorMessage;
+    }
+
+    public Set<Long> getUserIds() {
+        return userIds;
+    }
+
+    public void setUserIds(Set<Long> userIds) {
+        this.userIds = userIds;
     }
 }

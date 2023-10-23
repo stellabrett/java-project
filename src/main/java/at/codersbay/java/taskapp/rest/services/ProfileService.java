@@ -11,6 +11,7 @@ import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
 import at.codersbay.java.taskapp.rest.restapi.ProfileUserInputParam;
 import at.codersbay.java.taskapp.rest.restapi.response.ProfileUserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -51,15 +52,26 @@ public class ProfileService {
         if(userId != null) {
             user = userDAO.findById(userId).orElseThrow(() -> new UserNotFoundException());
         }
-        Profile profile = new Profile();
-        profile.setBio(bio);
-        profile.setProfilePhoto(profilePhoto);
 
-        if(user != null){
-            user.setProfile(profile);
-            userDAO.save(user);
-        }else {
-            profileDAO.save(profile);
+        try {
+            Profile profile = null;
+            if(user.getProfile() == null) {
+                profile = new Profile();
+            } else {
+                profile = user.getProfile();
+            }
+
+            profile.setBio(bio);
+            profile.setProfilePhoto(profilePhoto);
+
+            if(user != null){
+                user.setProfile(profile);
+                userDAO.save(user);
+            }
+
+        } catch(Throwable t) {
+            return false;
+
         }
         return true;
 
@@ -117,17 +129,28 @@ public class ProfileService {
 
 
     /**
+     *
      * searches for the profile based on the passed ID and updates both the profile and the
      * User information based on input parameters
-     *
      * @param profileId the id of the profile to update
-     * @param param the input parameters, containing the updated profile and user infos.
+     * @param bio the updated bio
+     * @param profilePhoto the updated profile photo
+     * @param firstname updated firstname of the associated user
+     * @param lastname updated lastname of the associated user
+     * @param email updated email of the associated user
      * @throws PrimaryIdNullOrEmptyException when given id is null or invalid
      * @throws ProfileNotFoundException if the profile with the given id is not found
      * @throws UserNotFoundException when the associated User of the profile is not found
      */
     @Transactional
-    public void updateProfileAndUser(Long profileId, ProfileUserInputParam param)
+    public void updateProfileAndUser(
+            Long profileId,
+            String bio,
+            String profilePhoto,
+            String firstname,
+            String lastname,
+            String email
+            )
     throws PrimaryIdNullOrEmptyException, ProfileNotFoundException, UserNotFoundException {
         if(profileId == null){
             throw new PrimaryIdNullOrEmptyException();
@@ -141,14 +164,13 @@ public class ProfileService {
             throw new UserNotFoundException();
         }
 
-        profile.setBio(param.getBio());
-        profile.setProfilePhoto(param.getProfilePhoto());
+        profile.setBio(bio);
+        profile.setProfilePhoto(profilePhoto);
 
-        user.setEmail(param.getEmail());
-        user.setFirstname(param.getFirstname());
-        user.setLastname(param.getLastname());
+        user.setFirstname(firstname);
+        user.setLastname(lastname);
+        user.setEmail(email);
 
-        profileDAO.save(profile);
         userDAO.save(user);
     }
 
@@ -176,8 +198,9 @@ public class ProfileService {
             if(user != null){
                 userDAO.delete(user);
             }
+        } else {
+            profileDAO.delete(profile);
         }
-        profileDAO.delete(profile);
     }
 
 
