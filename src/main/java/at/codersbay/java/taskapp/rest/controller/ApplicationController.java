@@ -87,8 +87,8 @@ public class ApplicationController {
      *
      * @param id user Id
      * @return HTTP status 200 (OK) and the user,
-     * HTTP status 500 (Bad Request) and a message,
-     * HTTP status 404 (Not found) and a message
+     * HTTP status 500 (Bad Request) and a message,null
+     * HTTP status 404 (Not found) and a message, null
      */
 
     @GetMapping("/users/{id}")
@@ -113,8 +113,8 @@ public class ApplicationController {
      *
      * @param email the email address of the user
      * @return HTTP status 200 (OK) and the user,
-     * HTTP status 500 (Bad Request) and a message,
-     * HTTP status 404 (Not found) and a message
+     * HTTP status 500 (Bad Request) and a message if given id is null,
+     * HTTP status 404 (Not found) and a message if no user was found
      */
 
     @GetMapping("/users/userByEmail/{email}")
@@ -140,6 +140,9 @@ public class ApplicationController {
      * @param id the id of the user to update
      * @param updatedUser a JSON containing the updated infos and optional the profile infos
      * @return HTTP status 200 (OK)  the entity with the updated user,and a message
+     * HTTP status 400 (Bad Request) and message when no user data is sent
+     * HTTP status 400 (Bad Request) and a message if no id was given
+     * HTTP status 404 (Not found) and a message if no user with given id was found
      */
 
     @PutMapping("/users/{id}")
@@ -159,10 +162,12 @@ public class ApplicationController {
             return new ResponseEntity<>(new RestApiResponse(unfe.getDefaultMessage(), null), HttpStatus.NOT_FOUND);
         } catch (PrimaryIdNullOrEmptyException pinoee) {
             return new ResponseEntity<>(new RestApiResponse(pinoee.getDefaultMessage(), null), HttpStatus.BAD_REQUEST);
+        } catch (IllegalArgumentException iae) {
+            return new ResponseEntity<>(new RestApiResponse("Please enter valid user data", null), HttpStatus.BAD_REQUEST);
         }
     }
 
-    //TODO fängt nicht ab wenn keine id geschcikt wird
+    //TODO wenn keine id übergeben wird, wie testen?
     /**
      * API endpoint to delete a user and deletes him from his tasks
      *
@@ -171,8 +176,9 @@ public class ApplicationController {
      *
      * @param id the id of the user to delete
      * @return HTTP status 200 (OK) true and a message,
-     *      * HTTP status 500 (Bad Request) and a message,
-     *      * HTTP status 404 (Not found) false, and a message
+     * HTTP status 400 (Bad Request) and a message when id is null or empty
+     * HTTP status 404 (Not found) false, and a message
+     * HTTP status 500 (Internal Server Error) if deletion failed
      */
 
     @DeleteMapping("user/{id}")
@@ -183,13 +189,17 @@ public class ApplicationController {
 
         if(id == null || id <= 0){
             status = HttpStatus.BAD_REQUEST;
-            message = " please enter your id";
+            message = " please enter a valid user id";
         }else {
-
             try {
-                result = userService.deleteUser(id);
-                status = HttpStatus.OK;
-                message = "User succsessfully deleted";
+                if(userService.deleteUser(id)){
+                    result = userService.deleteUser(id);
+                    status = HttpStatus.OK;
+                    message = "User succsessfully deleted";
+                } else {
+                    status = HttpStatus.INTERNAL_SERVER_ERROR;
+                    message = "deletion failed";
+                }
 
             } catch (UserNotFoundException unfe) {
                 message = unfe.getDefaultMessage();
@@ -251,7 +261,6 @@ public class ApplicationController {
         return new ResponseEntity<>(response, status);
     }
 
-    //TODO gibt profile doppelt
 
     /**
      * API endpoint to get all profiles including their users
@@ -502,6 +511,7 @@ public class ApplicationController {
      * @param param the input parameters, containing the updated task and user Ids
      * @return HTTP status 200 (OK) and the updated task
      * HTTP status 404 (Not Found) and a message: Task not found
+     * HTTP status
      */
     @PutMapping("/tasks/{taskId}")
     public ResponseEntity<?> updateTask(

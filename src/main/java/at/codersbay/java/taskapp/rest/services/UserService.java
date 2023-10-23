@@ -41,10 +41,11 @@ public class UserService {
      */
     public User addUser(User user, Profile profile) throws IllegalArgumentException {
         Optional<User> existingUser = userDAO.findUserByEmail(user.getEmail());
-        if(existingUser.isPresent()){
-            throw new IllegalArgumentException();
-        }else {
-            if(profile != null) {
+
+        if (existingUser.isPresent()){
+            throw new IllegalArgumentException("The email address is already registered!");
+
+        } if (profile != null) {
                 user.setProfile(profile);
                 profile.setUser(user);
                 profileDAO.save(profile);
@@ -53,7 +54,7 @@ public class UserService {
             userDAO.save(user);
             return user;
         }
-    }
+
 
     /**
      * This method reads all user incl. their profiles and tasks
@@ -94,7 +95,7 @@ public class UserService {
         }
 
         Optional<User> userOptional = userDAO.findById(userId);
-
+        //isEmpty..throw new... geht nicht?
         if (userOptional.isPresent()) {
            User user = userOptional.get();
 
@@ -144,9 +145,13 @@ public class UserService {
      * @throws PrimaryIdNullOrEmptyException when the given id is null
      * @throws UserNotFoundException when the user is not found
      */
-    public User updateUser(Long id, User updatedUser) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
+    public User updateUser(Long id, User updatedUser) throws PrimaryIdNullOrEmptyException, UserNotFoundException, IllegalArgumentException {
         if ( id == null){
             throw new PrimaryIdNullOrEmptyException();
+        }
+        if (updatedUser == null ||
+                (updatedUser.getFirstname() == null && updatedUser.getLastname()== null && updatedUser.getEmail() == null)){
+            throw  new IllegalArgumentException("Please Enter valid user data");
         }
         Optional<User> userOptional = userDAO.findById(id);
 
@@ -185,21 +190,14 @@ public class UserService {
         if (id == null || id <= 0) {
             throw new PrimaryIdNullOrEmptyException();
         }
-
-        Optional<User> userOptional = userDAO.findById(id);
-
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
+    // Konstruktorreferenz-Lambda-Ausdruck, erstellt eine neu Instanz der unfe
+        User user = userDAO.findById(id).orElseThrow(UserNotFoundException::new);
+        user.getTasks().forEach(task -> task.getUsers().remove(user));
 
             user.getTasks().clear();
             userDAO.delete(user);
             return true;
-        }else{
-            throw new UserNotFoundException();
         }
-
-    }
-
 
 
 }

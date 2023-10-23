@@ -151,8 +151,8 @@ public class TaskService {
     /**
      * This method update a task based on the id and the JSON with the updated Infos
      *
-     * @param taskId the id of the task to be updated
-     * @param param a JSON Object with the updated task
+     * @param taskId the id of the task to be updated (Path variable)
+     * @param param a JSON Object with the updated task (request body)
      * @return If successful, the updated task
      * @throws PrimaryIdNullOrEmptyException when the given id is null
      * @throws TaskNotFoundException when the task is not found
@@ -163,7 +163,7 @@ public class TaskService {
     public Task updateTask(Long taskId, TaskUserInputParam param)
             throws PrimaryIdNullOrEmptyException, TaskNotFoundException, UserNotFoundException {
         if (taskId == null) {
-            throw new PrimaryIdNullOrEmptyException();
+            throw new PrimaryIdNullOrEmptyException("miau");
         }
 
         Task existingTask = taskDAO.findById(taskId)
