@@ -34,19 +34,23 @@ public class TaskService {
     /**
      * This method creates a task and assigns it to the specified users
      *
-     * @param userIds
+     * @param userIds The user ID of the user to whom the task is assigned
      * @param title
      * @param description
      * @param deadline
-     * @param completed
+     * @param completed boolean, true if its completed, false if not
      * @return true if the task was successfully created and assigned to users, otherwise false
      * @throws PrimaryIdNullOrEmptyException when the id is null
      * @throws UserNotFoundException when the user is not found
      */
+    @Transactional
     public boolean createTask(Set<Long> userIds, String title, String description, LocalDate deadline, boolean completed)
-            throws PrimaryIdNullOrEmptyException, UserNotFoundException {
+            throws PrimaryIdNullOrEmptyException, UserNotFoundException, IllegalArgumentException {
+
         if (userIds == null || userIds.isEmpty()) {
             throw new PrimaryIdNullOrEmptyException("user Ids are null or empty");
+        } if (title.isEmpty() || description.isEmpty() || deadline.isBefore(LocalDate.now())){
+            throw new IllegalArgumentException("Invalid input parameters");
         }
 
         Task task = new Task();
@@ -73,12 +77,11 @@ public class TaskService {
      */
     public List<TaskUserResponse> getTasks() throws TaskNotFoundException {
         List<Task> tasks = taskDAO.findAll();
-
+        List<TaskUserResponse> taskResponses = new ArrayList<>();
 
         if (tasks.isEmpty()){
             throw new TaskNotFoundException("No tasks were found", null);
         }
-        List<TaskUserResponse> taskResponses = new ArrayList<>();
 
         for (Task task : tasks) {
             Set<User> users = task.getUsers();
@@ -101,16 +104,13 @@ public class TaskService {
             throw new PrimaryIdNullOrEmptyException();
         }
 
-        Optional<Task> taskOptional = taskDAO.findById(id);
+        Task task = taskDAO.findById(id).orElseThrow(TaskNotFoundException::new);
+        Set<User> users = task.getUsers();
 
-        if (taskOptional.isPresent()) {
-            Task task = taskOptional.get();
-            Set<User> users = task.getUsers();
-
-            return new TaskUserResponse(task, users, null);
+        return new TaskUserResponse(task, users, null);
         }
-        throw new TaskNotFoundException();
-    }
+
+
 
     /**
      * This method deletes a task based on the passed id
@@ -120,18 +120,15 @@ public class TaskService {
      * @throws PrimaryIdNullOrEmptyException when the id is null
      * @throws TaskNotFoundException when the Task is not found
      */
+@Transactional
 
-    // TODO reza fragen warum ich nsee werfen muss
     public boolean deleteTask(Long id) throws PrimaryIdNullOrEmptyException, TaskNotFoundException {
 
         if (id == null) {
             throw new PrimaryIdNullOrEmptyException("given id is null.");
         }
 
-        Task task = null;
-
-        try {
-            task = this.taskDAO.findById(id).get();
+        Task task = this.taskDAO.findById(id).orElseThrow(TaskNotFoundException::new);
 
             if (task.getUsers() != null && task.getUsers().size() > 0) {
                 for (User user : task.getUsers()) {
@@ -141,11 +138,8 @@ public class TaskService {
             }
 
             this.taskDAO.delete(task);
-        } catch (NoSuchElementException nsee) {
-            throw new TaskNotFoundException("could not found task with given id.", id);
-        }
 
-        return false;
+            return false;
     }
 
     /**
@@ -159,6 +153,7 @@ public class TaskService {
      * @throws UserNotFoundException when the user is not found
      */
 
+    //TODO void ?
     @Transactional
     public Task updateTask(Long taskId, TaskUserInputParam param)
             throws PrimaryIdNullOrEmptyException, TaskNotFoundException, UserNotFoundException {

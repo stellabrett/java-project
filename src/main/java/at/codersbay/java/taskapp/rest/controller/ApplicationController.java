@@ -364,7 +364,6 @@ public class ApplicationController {
 
 //------------------------------- tasks ------------------------------
 
-    //TODO Gibt 400 Bad request..seriously
     /**
      *
      * Api endpoint for creating a new task based on the parameters passed and assigns it to the specified users.
@@ -401,15 +400,18 @@ public class ApplicationController {
             } else {
                 status = HttpStatus.BAD_REQUEST;
                 message = "failed";
-
             }
         } catch (PrimaryIdNullOrEmptyException pinoee) {
-            message = "please enter a user ID ";
+            message = pinoee.getDefaultMessage();
             status = HttpStatus.BAD_REQUEST;
 
         } catch (UserNotFoundException unfe) {
-            message = "user not found";
+            message = unfe.getDefaultMessage();
             status = HttpStatus.NOT_FOUND;
+
+        } catch (IllegalArgumentException iae) {
+            message = "invalid input parameters";
+            status = HttpStatus.BAD_REQUEST;
 
         }
 
