@@ -1,11 +1,12 @@
 package at.codersbay.java.taskapp.rest.restapi;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 public class TaskInputParam {
 
-    private Set<Long> userIds;
+    private List<Long> userIds;
 
     private String title;
 
@@ -13,21 +14,17 @@ public class TaskInputParam {
 
     private LocalDate deadline;
 
-    private boolean completed;
+    private boolean completed = false;
 
-    public TaskInputParam(Set<Long> userId, String bio, String profilePhoto, LocalDate deadline, boolean completed){
-        this.userIds = userId;
-        this.title = bio;
-        this.description = profilePhoto;
-        this.deadline = deadline;
-        this.completed = completed;
+    public TaskInputParam(){
+
     }
 
-    public Set<Long> getUserIds() {
+    public List<Long> getUserIds() {
         return userIds;
     }
 
-    public void setUserIds(Set<Long> userIds) {
+    public void setUserIds(List<Long> userIds) {
         this.userIds = userIds;
     }
 

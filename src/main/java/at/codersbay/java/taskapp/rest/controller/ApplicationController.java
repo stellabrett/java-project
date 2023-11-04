@@ -382,6 +382,8 @@ public class ApplicationController {
         String message = "";
         boolean result = false;
 
+        System.out.println("Received userIds 1: " + param.getUserIds());
+
         try {
             boolean created = taskService.createTask(
                     param.getUserIds(),
@@ -390,6 +392,7 @@ public class ApplicationController {
                     param.getDeadline(),
                     param.isCompleted()
             );
+
 
             if (created) {
                 status = HttpStatus.OK;
@@ -478,6 +481,7 @@ public class ApplicationController {
      * HTTP status 404 (Not Found) message and false
      * HTTP status 500 (Bad Request) a message and false
      */
+    @CrossOrigin(origins = "http://localhost:5175")
     @DeleteMapping("task/{id}")
     ResponseEntity<RestApiResponse> deleteTask(@PathVariable Long id) {
         HttpStatus status = null;

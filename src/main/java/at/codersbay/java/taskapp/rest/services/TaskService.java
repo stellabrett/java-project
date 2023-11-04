@@ -44,7 +44,7 @@ public class TaskService {
      * @throws UserNotFoundException when the user is not found
      */
     @Transactional
-    public boolean createTask(Set<Long> userIds, String title, String description, LocalDate deadline, boolean completed)
+    public boolean createTask(List<Long> userIds, String title, String description, LocalDate deadline, boolean completed)
             throws PrimaryIdNullOrEmptyException, UserNotFoundException, IllegalArgumentException {
 
         if (userIds == null || userIds.isEmpty()) {
