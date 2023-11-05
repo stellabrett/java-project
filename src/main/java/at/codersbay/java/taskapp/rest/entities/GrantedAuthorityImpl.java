@@ -26,9 +26,9 @@ public class GrantedAuthorityImpl implements GrantedAuthority {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "authorities_users",
+            name = "authorities_appUsers",
             joinColumns = @JoinColumn(name = "authorityId"),
-            inverseJoinColumns = @JoinColumn(name = "userId"))
+            inverseJoinColumns = @JoinColumn(name = "appUserId"))
     private Set<AppUser> appUsers;
 
     public GrantedAuthorityImpl() {

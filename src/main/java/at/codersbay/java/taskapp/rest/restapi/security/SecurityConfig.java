@@ -42,9 +42,9 @@ import org.springframework.security.web.util.matcher.RegexRequestMatcher;
             return http.csrf().disable()
                     .authorizeHttpRequests()
                     .requestMatchers(
-                            new RegexRequestMatcher("authenticate", HttpMethod.POST.toString()),
+                            new RegexRequestMatcher("login", HttpMethod.POST.toString()),
                             //  GOOGLE ant Muster...permit all erlaubt vorherige Requests
-                            new AntPathRequestMatcher("/tasks/", HttpMethod.GET.toString())
+                            new AntPathRequestMatcher("/login/", HttpMethod.GET.toString())
                     ).permitAll()
                     .and()
                     .authorizeHttpRequests().requestMatchers(

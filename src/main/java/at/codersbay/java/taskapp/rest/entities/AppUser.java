@@ -9,7 +9,7 @@ import java.util.Set;
 
 @Entity
 @Table(name= "appUsers")
-public class AppUser extends User implements UserDetails {
+public class AppUser implements UserDetails {
 
     @Id
     @GeneratedValue(generator = "appUsersSequence")
