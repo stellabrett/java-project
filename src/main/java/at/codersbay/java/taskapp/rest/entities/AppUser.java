@@ -1,6 +1,7 @@
 package at.codersbay.java.taskapp.rest.entities;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.GeneratedValue;
@@ -9,7 +10,7 @@ import javax.persistence.ManyToMany;
 import java.util.Set;
 
 
-public class AppUser  {
+public class AppUser extends User implements UserDetails {
 
     @Id
     @GeneratedValue(generator = "appUsersSequence")
@@ -63,4 +64,26 @@ public class AppUser  {
     public void setAuthorities(Set<GrantedAuthorityImpl> authorities) {
         this.authorities = authorities;
     }
-}
+
+        @Override
+        public boolean isAccountNonExpired() {
+            return true;
+        }
+
+        @Override
+        public boolean isAccountNonLocked() {
+            return true;
+        }
+
+        @Override
+        public boolean isCredentialsNonExpired() {
+            return true;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return true;
+        }
+
+    }
+
