@@ -1,6 +1,8 @@
-package at.codersbay.java.taskapp.rest.restapi.security;
+package at.codersbay.java.taskapp.rest.services;
 
+import at.codersbay.java.taskapp.rest.dao.AppUserDAO;
 import at.codersbay.java.taskapp.rest.dao.UserDAO;
+import at.codersbay.java.taskapp.rest.entities.AppUser;
 import at.codersbay.java.taskapp.rest.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,20 +14,21 @@ import org.springframework.stereotype.Component;
 public class AppUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private UserDAO userDAO;
-
+    private AppUserDAO appUserDAO;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+
         if (username == null || username.trim().length() == 0) {
-            throw new UsernameNotFoundException("Given username was null or empty");
+            throw new UsernameNotFoundException("given username was null or empty");
         }
 
-        User user = this.userDAO.findByUsername(username);
-        if (user == null) {
-            throw new UsernameNotFoundException("User not found: " + username);
+        AppUser appUser = appUserDAO.findByUsername(username);
+
+        if (appUser == null) {
+            throw new UsernameNotFoundException("User not found");
         }
 
-        return user;
+        return appUser;
     }
 }

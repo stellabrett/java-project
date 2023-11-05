@@ -29,7 +29,7 @@ public class GrantedAuthorityImpl implements GrantedAuthority {
             name = "authorities_users",
             joinColumns = @JoinColumn(name = "authorityId"),
             inverseJoinColumns = @JoinColumn(name = "userId"))
-    private Set<User> users;
+    private Set<AppUser> appUsers;
 
     public GrantedAuthorityImpl() {
 
@@ -52,11 +52,11 @@ public class GrantedAuthorityImpl implements GrantedAuthority {
         this.authority = authority;
     }
 
-    public Set<User> getUsers() {
-        return users;
+    public Set<AppUser> getAppUsers() {
+        return appUsers;
     }
 
-    public void setUsers(Set<User> users) {
-        this.users = users;
+    public void setAppUsers(Set<AppUser> appUsers) {
+        this.appUsers = appUsers;
     }
 }

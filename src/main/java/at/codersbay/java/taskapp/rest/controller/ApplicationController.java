@@ -6,6 +6,8 @@ import at.codersbay.java.taskapp.rest.entities.User;
 import at.codersbay.java.taskapp.rest.exceptions.*;
 import at.codersbay.java.taskapp.rest.restapi.*;
 import at.codersbay.java.taskapp.rest.restapi.response.*;
+import at.codersbay.java.taskapp.rest.restapi.security.AuthRequest;
+import at.codersbay.java.taskapp.rest.restapi.security.JwtService;
 import at.codersbay.java.taskapp.rest.services.ProfileService;
 import at.codersbay.java.taskapp.rest.services.TaskService;
 import at.codersbay.java.taskapp.rest.services.UserService;
@@ -14,6 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -32,12 +38,31 @@ public class ApplicationController {
     @Autowired
     private TaskService taskService;
 
+    @Autowired
+    private JwtService jwtService;
+
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    //-------------------------------- Security ------------------------
+    @PostMapping("/login")
+    public String authenticate(@RequestBody AuthRequest authRequest) {
+        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                authRequest.getUsername(), authRequest.getPassword()));
+        if (authentication.isAuthenticated()) {
+            return jwtService.generateToken(authRequest.getUsername());
+        } else {
+            throw new UsernameNotFoundException("invalid user request !");
+        }
+    }
+
 
     //-------------------------------- User ------------------------
 
 
 
-    /**
+                               /**
      * API endpoint to add a new User
      *
      * HTTP request method: POST
@@ -48,8 +73,8 @@ public class ApplicationController {
      * HTTP status 500 (Bad Request) if the user already exists and a message
      *
      */
-    @PostMapping("/users")
-    public ResponseEntity<?> addUser (@RequestBody User user ,@RequestBody(required = false) Profile profile) throws IllegalArgumentException {
+                               @PostMapping("/users")
+    public ResponseEntity<?> addUser (@RequestBody User user , @RequestBody(required = false) Profile profile) throws IllegalArgumentException {
         try {
             User newUser = userService.addUser(user,profile);
             return new ResponseEntity<>(newUser, HttpStatus.OK);
