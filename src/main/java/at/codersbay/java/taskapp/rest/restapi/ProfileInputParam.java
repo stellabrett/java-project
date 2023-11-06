@@ -1,5 +1,7 @@
 package at.codersbay.java.taskapp.rest.restapi;
 
+import at.codersbay.java.taskapp.rest.entities.Profile;
+
 public class ProfileInputParam {
 
     private Long userId;
@@ -8,6 +10,9 @@ public class ProfileInputParam {
 
     private String profilePhoto;
 
+    public ProfileInputParam(){
+
+    }
     public ProfileInputParam(Long userId, String bio, String profilePhoto){
         this.userId = userId;
         this.bio = bio;

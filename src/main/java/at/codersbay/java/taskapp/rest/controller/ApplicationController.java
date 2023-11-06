@@ -68,23 +68,25 @@ public class ApplicationController {
      * HTTP request method: POST
      * Path: /users
      *
-     * @param user firstname, lastname, email of the new user
+
      * @return HTTP status 200 (OK) and the saved user,
      * HTTP status 500 (Bad Request) if the user already exists and a message
-     *
      */
-                               @PostMapping("/users")
-    public ResponseEntity<?> addUser (@RequestBody User user , @RequestBody(required = false) Profile profile) throws IllegalArgumentException {
-        try {
-            User newUser = userService.addUser(user,profile);
-            return new ResponseEntity<>(newUser, HttpStatus.OK);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The email address is already registered");
-        }
-    }
-
-
-
+     @PostMapping("/users")
+     public ResponseEntity<?> addUser(@RequestBody UserInputParam param) throws IllegalArgumentException {
+         try {
+             System.out.println(param.getProfile());
+             User user = new User();
+             user.setFirstname(param.getFirstname());
+             user.setLastname(param.getLastname());
+             user.setEmail(param.getEmail());
+             user.setProfile(param.getProfile());
+             user = userService.addUser(param);
+             return new ResponseEntity<>(user, HttpStatus.OK);
+         } catch (IllegalArgumentException e) {
+             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The email address is already registered");
+         }
+     }
     /**
      * API endpoint to get a list of all users incl. their profiles and tasks
      *
@@ -101,8 +103,7 @@ public class ApplicationController {
             return new ResponseEntity<>(userProfileTaskResponses, HttpStatus.OK);
         } catch (UserNotFoundException unfe) {
             return new ResponseEntity<>(Collections.singletonList(new UserProfileTaskResponse(unfe.getDefaultMessage())), HttpStatus.NOT_FOUND);
-          //  return new ResponseEntity<>(new UserProfileTaskResponse(unfe.getDefaultMessage()), HttpStatus.NOT_FOUND);
-            //return new ResponseEntity<>(new UserProfileTaskResponse("User not found"), HttpStatus.NOT_FOUND);
+
         }
     }
 
@@ -195,7 +196,7 @@ public class ApplicationController {
         }
     }
 
-    //TODO wenn keine id übergeben wird, wie testen?
+
     /**
      * API endpoint to delete a user and deletes him from his tasks
      *

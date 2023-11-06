@@ -69,7 +69,7 @@ public class TaskService {
     }
 
 
-// TODO error handling nochmal
+
     /**
      * Retrieves a list of all tasks along with their associated users
      *
@@ -157,6 +157,7 @@ public class TaskService {
      * @throws UserNotFoundException when the user is not found
      * @throws InvalidDeadlineException when the deadline is before the current date
      */
+
 
 
     @Transactional

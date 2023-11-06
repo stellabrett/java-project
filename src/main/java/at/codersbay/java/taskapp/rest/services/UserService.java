@@ -7,16 +7,18 @@ import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
 import at.codersbay.java.taskapp.rest.exceptions.PrimaryIdNullOrEmptyException;
 import at.codersbay.java.taskapp.rest.exceptions.UserNotFoundException;
+import at.codersbay.java.taskapp.rest.restapi.UserInputParam;
 import at.codersbay.java.taskapp.rest.restapi.response.UserProfileTaskResponse;
-import at.codersbay.java.taskapp.rest.restapi.response.UserTaskResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+
 
 @Service
 public class UserService {
@@ -25,6 +27,7 @@ public class UserService {
     @Autowired
     UserDAO userDAO;
 
+    @Autowired
     ProfileDAO profileDAO;
 
     public UserService(){
@@ -32,28 +35,38 @@ public class UserService {
     }
 
 
+
     /**
      * This method adds a new user after checking if the email address already exists
      *
-     * @param user The new user to be added
+     * @param param the imput param of the user and optional its profile
      * @return The added user if added successfully
-     * @throws DuplicateKeyException if the email address already exists in the database
+     * @throws IllegalArgumentException if the email address already exists in the database
      */
-    public User addUser(User user, Profile profile) throws IllegalArgumentException {
+
+    @Transactional
+    public User addUser(UserInputParam param) throws IllegalArgumentException {
+        User user = new User();
+        user.setFirstname(param.getFirstname());
+        user.setLastname(param.getLastname());
+        user.setEmail(param.getEmail());
+        Profile profile = param.getProfile();
+
         Optional<User> existingUser = userDAO.findUserByEmail(user.getEmail());
 
         if (existingUser.isPresent()){
             throw new IllegalArgumentException("The email address is already registered!");
-
-        } if (profile != null) {
-                user.setProfile(profile);
-                profile.setUser(user);
-                profileDAO.save(profile);
-            }
-
-            userDAO.save(user);
-            return user;
         }
+
+        if (profile != null) {
+            user.setProfile(profile);
+            profile.setUser(user);
+            profileDAO.save(profile);
+        }
+
+        userDAO.save(user);
+        return user;
+    }
 
 
     /**

@@ -7,9 +7,10 @@ import javax.persistence.*;
 import java.util.Set;
 
 
-@Entity
+
 @Table(name = "users")
 
+@Entity
 public class User {
     @Id
     @GeneratedValue(generator = "userSequence")
@@ -26,6 +27,8 @@ public class User {
     private Long id;
     private String firstname;
     private String lastname;
+
+
     private String email;
 
     @JsonIgnore

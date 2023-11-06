@@ -38,7 +38,7 @@ import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-          /** normal ein risiko*/
+
             return http.csrf().disable()
                     .authorizeHttpRequests()
                     .requestMatchers(
@@ -48,7 +48,7 @@ import org.springframework.security.web.util.matcher.RegexRequestMatcher;
                     ).permitAll()
                     .and()
                     .authorizeHttpRequests().requestMatchers(
-                            new AntPathRequestMatcher("/user/**", HttpMethod.GET.toString())
+                            new AntPathRequestMatcher("/blubb/**", HttpMethod.GET.toString())
                            // new AntPathRequestMatcher("/students/**", HttpMethod.POST.toString()),
                            // new AntPathRequestMatcher("/students/**", HttpMethod.DELETE.toString()),
                            // new AntPathRequestMatcher("/students/**", HttpMethod.PUT.toString())
