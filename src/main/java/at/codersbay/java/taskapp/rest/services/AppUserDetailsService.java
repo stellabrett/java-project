@@ -18,23 +18,17 @@ public class AppUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-    AppUser user = appUserDAO.findByUsername(username);
 
-        if (username == null || username.trim().length() == 0) {
+        if(username == null || username.trim().length() == 0) {
             throw new UsernameNotFoundException("given username was null or empty");
         }
 
-        AppUser appUser = appUserDAO.findByUsername(username);
+        try {
+            System.out.println(username);
+            return this.appUserDAO.findByUsername(username);
 
-        if (appUser == null) {
-            throw new UsernameNotFoundException("User not found");
+        } catch(Throwable t) {
+            throw new UsernameNotFoundException("something went wrong, sorry!");
         }
-
-        UserDetails userDetails = User.withUsername(user.getUsername())
-                .password(user.getPassword())
-               // .authorities(user.getRoles())
-                .build();
-
-        return userDetails;
     }
 }

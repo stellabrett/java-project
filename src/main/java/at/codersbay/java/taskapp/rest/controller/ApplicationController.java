@@ -46,14 +46,17 @@ public class ApplicationController {
     private AuthenticationManager authenticationManager;
 
     //-------------------------------- Security ------------------------
-    @PostMapping("/login")
+    @PostMapping("/authenticate")
     public String authenticate(@RequestBody AuthRequest authRequest) {
+        System.out.println(authRequest);
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 authRequest.getUsername(), authRequest.getPassword()));
         if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(authRequest.getUsername());
+            String token = jwtService.generateToken(authRequest.getUsername());
+            System.out.println("Generated Token: " + token); // Hier wird der Token in der Konsole ausgegeben
+            return token;
         } else {
-            throw new UsernameNotFoundException("invalid user request !");
+            throw new UsernameNotFoundException("Invalid user request");
         }
     }
 

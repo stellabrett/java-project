@@ -38,26 +38,18 @@ import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+            return http
+                    .csrf().disable()
+                    .authorizeRequests(authorizeRequests ->
+                                    authorizeRequests
+                                            .antMatchers("/**").permitAll()
 
-            return http.csrf().disable()
-                    .authorizeHttpRequests()
-                    .requestMatchers(
-                            new RegexRequestMatcher("login", HttpMethod.POST.toString()),
-                            //  GOOGLE ant Muster...permit all erlaubt vorherige Requests
-                            new AntPathRequestMatcher("/login/", HttpMethod.GET.toString())
-                    ).permitAll()
-                    .and()
-                    .authorizeHttpRequests().requestMatchers(
-                            new AntPathRequestMatcher("/blubb/**", HttpMethod.GET.toString())
-                           // new AntPathRequestMatcher("/students/**", HttpMethod.POST.toString()),
-                           // new AntPathRequestMatcher("/students/**", HttpMethod.DELETE.toString()),
-                           // new AntPathRequestMatcher("/students/**", HttpMethod.PUT.toString())
-
+                            // Weitere Berechtigungen und Routen hier hinzufügen, falls erforderlich
                     )
-                    .authenticated().and()
-                    .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                    .and()
+                    .sessionManagement(sessionManagement ->
+                            sessionManagement
+                                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    )
                     .authenticationProvider(authenticationProvider())
                     .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
                     .build();
