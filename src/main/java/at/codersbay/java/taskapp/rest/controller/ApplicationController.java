@@ -1,5 +1,6 @@
 package at.codersbay.java.taskapp.rest.controller;
 
+import at.codersbay.java.taskapp.rest.entities.AppUser;
 import at.codersbay.java.taskapp.rest.entities.Profile;
 import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
@@ -8,6 +9,7 @@ import at.codersbay.java.taskapp.rest.restapi.*;
 import at.codersbay.java.taskapp.rest.restapi.response.*;
 import at.codersbay.java.taskapp.rest.restapi.security.AuthRequest;
 import at.codersbay.java.taskapp.rest.restapi.security.JwtService;
+import at.codersbay.java.taskapp.rest.services.PasswordEncoderService;
 import at.codersbay.java.taskapp.rest.services.ProfileService;
 import at.codersbay.java.taskapp.rest.services.TaskService;
 import at.codersbay.java.taskapp.rest.services.UserService;
@@ -19,15 +21,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.annotation.PostConstruct;
 
 @RestController
 public class ApplicationController {
+    private static final Logger logger = LoggerFactory.getLogger(ApplicationController.class);
 
     @Autowired
     private UserService userService;
@@ -41,22 +49,38 @@ public class ApplicationController {
     @Autowired
     private JwtService jwtService;
 
-
     @Autowired
     private AuthenticationManager authenticationManager;
 
+
+    @Autowired
+    private PasswordEncoderService passwordEncoderService;
+
     //-------------------------------- Security ------------------------
+
+
+
     @PostMapping("/authenticate")
     public String authenticate(@RequestBody AuthRequest authRequest) {
-        System.out.println(authRequest);
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                authRequest.getUsername(), authRequest.getPassword()));
-        if (authentication.isAuthenticated()) {
-            String token = jwtService.generateToken(authRequest.getUsername());
-            System.out.println("Generated Token: " + token); // Hier wird der Token in der Konsole ausgegeben
-            return token;
-        } else {
-            throw new UsernameNotFoundException("Invalid user request");
+        logger.info("Authentication request for username: " + authRequest.getUsername());
+        logger.info("Authentication request for password: " + authRequest.getPassword());
+
+        try {
+            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
+                    authRequest.getUsername(), authRequest.getPassword()));
+
+            logger.info("Authentication successful for username: " + authRequest.getUsername());
+
+            if (authentication.isAuthenticated()) {
+                String token = jwtService.generateToken(authRequest.getUsername());
+                logger.info("Generated Token for username: " + authRequest.getUsername());
+                return token;
+            } else {
+                throw new UsernameNotFoundException("Invalid user request");
+            }
+        } catch (AuthenticationException e) {
+            logger.error("Authentication failed for username: " + authRequest.getUsername());
+            throw new UsernameNotFoundException("Authentication failed");
         }
     }
 
@@ -84,7 +108,9 @@ public class ApplicationController {
              user.setLastname(param.getLastname());
              user.setEmail(param.getEmail());
              user.setProfile(param.getProfile());
+             user.setAppUser(param.getAppUser());
              user = userService.addUser(param);
+             logger.info(String.valueOf(user));
              return new ResponseEntity<>(user, HttpStatus.OK);
          } catch (IllegalArgumentException e) {
              return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("The email address is already registered");
@@ -122,7 +148,7 @@ public class ApplicationController {
      * HTTP status 500 (Bad Request) and a message,null
      * HTTP status 404 (Not found) and a message, null
      */
-
+/**
     @GetMapping("/users/{id}")
     public ResponseEntity <UserProfileTaskResponse> getUserById(@PathVariable Long id) {
         try {
@@ -148,7 +174,7 @@ public class ApplicationController {
      * HTTP status 500 (Bad Request) and a message if given id is null,
      * HTTP status 404 (Not found) and a message if no user was found
      */
-
+/**
     @GetMapping("/users/userByEmail/{email}")
     public ResponseEntity<UserProfileTaskResponse> getUserByEmail(@PathVariable String email) {
         try {

@@ -27,8 +27,6 @@ public class User {
     private Long id;
     private String firstname;
     private String lastname;
-
-
     private String email;
 
     @JsonIgnore
@@ -46,7 +44,8 @@ public class User {
    // @JsonView(Views.WithTasks.class)
     Set<Task> tasks;
 
-
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private AppUser appUser;
     public User() {
     }
 
@@ -55,6 +54,7 @@ public class User {
         this.firstname = firstname;
         this.lastname = lastname;
         this.email = email;
+
     }
 
     public Long getId() {
@@ -105,6 +105,13 @@ public class User {
         this.tasks = tasks;
     }
 
+    public AppUser getAppUser() {
+        return appUser;
+    }
+
+    public void setAppUser(AppUser appUser) {
+        this.appUser = appUser;
+    }
 }
 
 

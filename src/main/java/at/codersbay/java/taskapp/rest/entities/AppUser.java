@@ -30,6 +30,10 @@ public class AppUser extends User implements UserDetails {
     @ManyToMany(mappedBy = "appUsers")
     Set<GrantedAuthorityImpl> authorities;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private User user;
+
 
     public Set<GrantedAuthorityImpl> getAuthorities() {
         return this.authorities;
@@ -84,5 +88,12 @@ public class AppUser extends User implements UserDetails {
             return true;
         }
 
+    public User getUser() {
+        return user;
     }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+}
 

@@ -15,6 +15,7 @@ public class TaskUserInputParam {
 
     private boolean completed;
 
+
     public TaskUserInputParam(){
 
     }

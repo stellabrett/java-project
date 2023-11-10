@@ -21,9 +21,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
+import javax.annotation.PostConstruct;
 
 
-    @Configuration
+@Configuration
     @EnableWebSecurity
     @EnableMethodSecurity
     public class SecurityConfig {
@@ -38,18 +39,21 @@ import org.springframework.security.web.util.matcher.RegexRequestMatcher;
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            return http
-                    .csrf().disable()
-                    .authorizeRequests(authorizeRequests ->
-                                    authorizeRequests
-                                            .antMatchers("/**").permitAll()
+            return http.csrf().disable()
+                    .authorizeHttpRequests()
+                    .requestMatchers(
+                            new RegexRequestMatcher("authenticate", HttpMethod.POST.toString()),
+                            new AntPathRequestMatcher("/task/", HttpMethod.GET.toString())
+                    ).permitAll()
+                    .and()
+                    .authorizeHttpRequests().requestMatchers(
+                            new AntPathRequestMatcher("/profiles/**", HttpMethod.DELETE.toString())
 
-                            // Weitere Berechtigungen und Routen hier hinzufügen, falls erforderlich
                     )
-                    .sessionManagement(sessionManagement ->
-                            sessionManagement
-                                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                    )
+                    .authenticated().and()
+                    .sessionManagement()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                    .and()
                     .authenticationProvider(authenticationProvider())
                     .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
                     .build();
@@ -72,4 +76,17 @@ import org.springframework.security.web.util.matcher.RegexRequestMatcher;
             return config.getAuthenticationManager();
         }
 
+
+        /**
+    @PostConstruct
+    public void testPasswordEncoder() {
+        String rawPassword = "testpassword";
+        String encodedPassword = passwordEncoder().encode(rawPassword);
+
+        System.out.println("Raw Password: " + rawPassword);
+        System.out.println("Encoded Password: " + encodedPassword);
     }
+    **/
+
+
+}

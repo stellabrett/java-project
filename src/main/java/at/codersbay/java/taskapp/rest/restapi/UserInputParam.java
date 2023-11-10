@@ -1,5 +1,6 @@
 package at.codersbay.java.taskapp.rest.restapi;
 
+import at.codersbay.java.taskapp.rest.entities.AppUser;
 import at.codersbay.java.taskapp.rest.entities.Profile;
 import at.codersbay.java.taskapp.rest.entities.User;
 
@@ -11,6 +12,10 @@ public class UserInputParam  {
     private String email;
 
     private Profile profile;
+
+    private AppUser appUser;
+
+
 
     public Long getId() {
         return id;
@@ -50,5 +55,13 @@ public class UserInputParam  {
 
     public void setProfile(Profile profile) {
         this.profile = profile;
+    }
+
+    public AppUser getAppUser() {
+        return appUser;
+    }
+
+    public void setAppUser(AppUser appUser) {
+        this.appUser = appUser;
     }
 }

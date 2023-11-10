@@ -2,6 +2,7 @@ package at.codersbay.java.taskapp.rest.services;
 
 import at.codersbay.java.taskapp.rest.dao.ProfileDAO;
 import at.codersbay.java.taskapp.rest.dao.UserDAO;
+import at.codersbay.java.taskapp.rest.entities.AppUser;
 import at.codersbay.java.taskapp.rest.entities.Profile;
 import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
@@ -51,6 +52,7 @@ public class UserService {
         user.setLastname(param.getLastname());
         user.setEmail(param.getEmail());
         Profile profile = param.getProfile();
+        user.setAppUser(param.getAppUser());
 
         Optional<User> existingUser = userDAO.findUserByEmail(user.getEmail());
 
@@ -83,7 +85,8 @@ public class UserService {
         for (User user : users) {
             Set<Task> tasks = user.getTasks();
             Profile profile = user.getProfile();
-            userProfileTaskResponses.add(new UserProfileTaskResponse(user, tasks, profile));
+            AppUser appUser = user.getAppUser();
+            userProfileTaskResponses.add(new UserProfileTaskResponse(user, tasks, profile, appUser));
         }
 
         if (userProfileTaskResponses.isEmpty()) {
@@ -92,7 +95,6 @@ public class UserService {
 
         return userProfileTaskResponses;
     }
-
     /**
      *  This method reads a user from the database based on their ID
      *
@@ -102,7 +104,7 @@ public class UserService {
      * @throws UserNotFoundException when the user is not found
      */
 
-    public UserProfileTaskResponse getUserById(Long userId) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
+    /**public UserProfileTaskResponse getUserById(Long userId) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
         if (userId == null) {
             throw new PrimaryIdNullOrEmptyException();
         }
@@ -128,7 +130,7 @@ public class UserService {
      * @throws UserNotFoundException when the user is not found
      */
 
-    public UserProfileTaskResponse getUserByEmail(String email) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
+    /**public UserProfileTaskResponse getUserByEmail(String email) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
         if (email == null) {
             throw new PrimaryIdNullOrEmptyException();
         }

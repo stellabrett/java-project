@@ -1,10 +1,13 @@
 package at.codersbay.java.taskapp.rest.restapi.security;
 
+import at.codersbay.java.taskapp.rest.controller.ApplicationController;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -14,11 +17,15 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 
 
     @Component
     public class JwtService {
+        private static final Logger logger = LoggerFactory.getLogger(JwtService.class);
 
 
         public static final String SECRET = "5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437";
@@ -38,6 +45,7 @@ import java.util.function.Function;
         }
 
         private Claims extractAllClaims(String token) {
+            logger.info("extractclaims");
             return Jwts
                     .parserBuilder()
                     .setSigningKey(getSignKey())
@@ -47,18 +55,24 @@ import java.util.function.Function;
         }
 
         private Boolean isTokenExpired(String token) {
+            logger.info("try if token is expired");
             return extractExpiration(token).before(new Date());
         }
 
         public Boolean validateToken(String token, UserDetails userDetails) {
             final String username = extractUsername(token);
+            logger.info("extract username");
             return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
         }
 
 
         public String generateToken(String userName){
+            logger.info("try generate token");
             Map<String,Object> claims=new HashMap<>();
-            return createToken(claims,userName);
+
+            String token = createToken(claims,userName);
+            logger.info("token generated");
+            return token;
         }
 
         private String createToken(Map<String, Object> claims, String userName) {
@@ -78,8 +92,13 @@ import java.util.function.Function;
         }
 
         private Key getSignKey() {
-            byte[] keyBytes= Decoders.BASE64.decode(SECRET);
-            return Keys.hmacShaKeyFor(keyBytes);
+            try {
+                byte[] keyBytes = Decoders.BASE64.decode(SECRET);
+                return Keys.hmacShaKeyFor(keyBytes);
+            } catch (Exception e) {
+                logger.error("eroor loading secret", e);
+                throw new RuntimeException("error loading secret", e);
+            }
         }
     }
 
