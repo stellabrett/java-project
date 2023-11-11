@@ -102,13 +102,17 @@ public class ApplicationController {
      @PostMapping("/users")
      public ResponseEntity<?> addUser(@RequestBody UserInputParam param) throws IllegalArgumentException {
          try {
-             System.out.println(param.getProfile());
+
              User user = new User();
              user.setFirstname(param.getFirstname());
              user.setLastname(param.getLastname());
              user.setEmail(param.getEmail());
              user.setProfile(param.getProfile());
-             user.setAppUser(param.getAppUser());
+
+             String username = param.getUsername();
+             String password = param.getPassword();
+
+logger.info("username  " + param.getUsername());
              user = userService.addUser(param);
              logger.info(String.valueOf(user));
              return new ResponseEntity<>(user, HttpStatus.OK);
@@ -125,6 +129,8 @@ public class ApplicationController {
      * @return HTTP status 200 (OK) and all users,
      * HTTP status 404 (NOT FOUND) if no user was found
      */
+
+    /*
     @GetMapping("/users")
     public ResponseEntity<List<UserProfileTaskResponse>> getUsers() {
         try {
@@ -148,7 +154,8 @@ public class ApplicationController {
      * HTTP status 500 (Bad Request) and a message,null
      * HTTP status 404 (Not found) and a message, null
      */
-/**
+
+    /*
     @GetMapping("/users/{id}")
     public ResponseEntity <UserProfileTaskResponse> getUserById(@PathVariable Long id) {
         try {

@@ -1,5 +1,6 @@
 package at.codersbay.java.taskapp.rest.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -30,6 +31,7 @@ public class AppUser extends User implements UserDetails {
     @ManyToMany(mappedBy = "appUsers")
     Set<GrantedAuthorityImpl> authorities;
 
+    @JsonIgnore
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     private User user;

@@ -4,7 +4,7 @@ import at.codersbay.java.taskapp.rest.entities.AppUser;
 import at.codersbay.java.taskapp.rest.entities.Profile;
 import at.codersbay.java.taskapp.rest.entities.User;
 
-public class UserInputParam  {
+public class UserInputParam {
 
     private Long id;
     private String firstname;
@@ -13,9 +13,9 @@ public class UserInputParam  {
 
     private Profile profile;
 
-    private AppUser appUser;
+    private String username;
 
-
+    private String password;
 
 
     public Long getId() {
@@ -58,11 +58,19 @@ public class UserInputParam  {
         this.profile = profile;
     }
 
-    public AppUser getAppUser() {
-        return appUser;
+    public String getUsername() {
+        return username;
     }
 
-    public void setAppUser(AppUser appUser) {
-        this.appUser = appUser;
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

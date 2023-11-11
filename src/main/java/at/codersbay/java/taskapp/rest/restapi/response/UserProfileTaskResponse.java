@@ -14,17 +14,19 @@ public class UserProfileTaskResponse {
 
  private Profile profile;
 
- private AppUser appUser;
+ //private AppUser appUser;
 
  private String errorMessage;
+ private String username;
 
 
 
-    public UserProfileTaskResponse(User user, Set<Task> tasks ,Profile profile, AppUser appUser) {
+    public UserProfileTaskResponse(User user, Set<Task> tasks ,Profile profile, String username) {
         this.user = user;
         this.tasks = tasks;
         this.profile = profile;
-        this.appUser= appUser;
+        //this.appUser= appUser;
+        this.username = username;
 
     }
     public UserProfileTaskResponse(String errorMessage) {
@@ -55,12 +57,17 @@ public class UserProfileTaskResponse {
         this.tasks = tasks;
     }
 
-    public AppUser getAppUser() {
-        return appUser;
+    //public AppUser getAppUser() {return appUser;}
+
+    //public void setAppUser(AppUser appUser) {this.appUser = appUser;}
+
+
+    public String getUsername() {
+        return username;
     }
 
-    public void setAppUser(AppUser appUser) {
-        this.appUser = appUser;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public Profile getProfile() {

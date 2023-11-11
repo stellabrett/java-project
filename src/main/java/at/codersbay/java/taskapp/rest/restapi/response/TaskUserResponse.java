@@ -6,7 +6,7 @@ import at.codersbay.java.taskapp.rest.entities.User;
 import java.util.Set;
 
 public class TaskUserResponse {
-    private Task task;
+private Task task;
  private Set<User> user;
  private  Set<Long> userIds;
 

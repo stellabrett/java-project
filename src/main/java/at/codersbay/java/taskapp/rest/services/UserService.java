@@ -52,13 +52,21 @@ public class UserService {
         user.setLastname(param.getLastname());
         user.setEmail(param.getEmail());
         Profile profile = param.getProfile();
-        user.setAppUser(param.getAppUser());
+
 
         Optional<User> existingUser = userDAO.findUserByEmail(user.getEmail());
 
         if (existingUser.isPresent()){
             throw new IllegalArgumentException("The email address is already registered!");
         }
+
+        String username = param.getUsername();
+        String password = param.getPassword();
+        AppUser appUser = new AppUser();
+        appUser.setUsername(username);
+        appUser.setPassword(password);
+        user.setAppUser(appUser);
+
 
         if (profile != null) {
             user.setProfile(profile);
@@ -78,15 +86,14 @@ public class UserService {
      * @throws UserNotFoundException when no user is found
      */
 
-    public List<UserProfileTaskResponse> getUsers() throws UserNotFoundException {
+   /** public List<UserProfileTaskResponse> getUsers() throws UserNotFoundException {
         List<User> users = userDAO.findAll();
         List<UserProfileTaskResponse> userProfileTaskResponses = new ArrayList<>();
 
         for (User user : users) {
             Set<Task> tasks = user.getTasks();
             Profile profile = user.getProfile();
-            AppUser appUser = user.getAppUser();
-            userProfileTaskResponses.add(new UserProfileTaskResponse(user, tasks, profile, appUser));
+            userProfileTaskResponses.add(new UserProfileTaskResponse(user, tasks, profile));
         }
 
         if (userProfileTaskResponses.isEmpty()) {
@@ -104,7 +111,7 @@ public class UserService {
      * @throws UserNotFoundException when the user is not found
      */
 
-    /**public UserProfileTaskResponse getUserById(Long userId) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
+   /** public UserProfileTaskResponse getUserById(Long userId) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
         if (userId == null) {
             throw new PrimaryIdNullOrEmptyException();
         }
@@ -116,7 +123,7 @@ public class UserService {
 
            Set<Task> tasks = user.getTasks();
            Profile profile = user.getProfile();
-           return new UserProfileTaskResponse(user, tasks, profile);
+           return new UserProfileTaskResponse(user, tasks, profile, user.getAppUser());
         } else {
             throw new UserNotFoundException();
         }
@@ -129,8 +136,8 @@ public class UserService {
      * @throws PrimaryIdNullOrEmptyException when the given id is null
      * @throws UserNotFoundException when the user is not found
      */
-
-    /**public UserProfileTaskResponse getUserByEmail(String email) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
+/**
+    public UserProfileTaskResponse getUserByEmail(String email) throws PrimaryIdNullOrEmptyException, UserNotFoundException {
         if (email == null) {
             throw new PrimaryIdNullOrEmptyException();
         }
@@ -142,7 +149,7 @@ public class UserService {
             Set<Task> tasks = user.getTasks();
             Profile profile = user.getProfile();
 
-            UserProfileTaskResponse response = new UserProfileTaskResponse(user, tasks, profile);
+            UserProfileTaskResponse response = new UserProfileTaskResponse(user, tasks, profile, user.getAppUser());
             return response;
         } else {
             throw new UserNotFoundException();

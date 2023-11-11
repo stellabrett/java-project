@@ -44,6 +44,7 @@ public class User {
    // @JsonView(Views.WithTasks.class)
     Set<Task> tasks;
 
+@JsonIgnore
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private AppUser appUser;
     public User() {
