@@ -89,7 +89,7 @@ public class ApplicationController {
 
 
 
-                               /**
+    /**
      * API endpoint to add a new User
      *
      * HTTP request method: POST

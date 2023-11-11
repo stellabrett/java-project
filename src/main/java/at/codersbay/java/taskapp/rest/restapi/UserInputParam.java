@@ -17,6 +17,7 @@ public class UserInputParam  {
 
 
 
+
     public Long getId() {
         return id;
     }

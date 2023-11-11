@@ -76,7 +76,6 @@ import javax.annotation.PostConstruct;
             return config.getAuthenticationManager();
         }
 
-
         /**
     @PostConstruct
     public void testPasswordEncoder() {
@@ -86,7 +85,7 @@ import javax.annotation.PostConstruct;
         System.out.println("Raw Password: " + rawPassword);
         System.out.println("Encoded Password: " + encodedPassword);
     }
-    **/
 
+**/
 
 }
