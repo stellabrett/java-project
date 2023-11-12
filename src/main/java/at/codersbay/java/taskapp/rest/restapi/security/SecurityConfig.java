@@ -43,11 +43,13 @@ import javax.annotation.PostConstruct;
                     .authorizeHttpRequests()
                     .requestMatchers(
                             new RegexRequestMatcher("authenticate", HttpMethod.POST.toString()),
-                            new AntPathRequestMatcher("/task/", HttpMethod.GET.toString())
+                            new AntPathRequestMatcher("/task/", HttpMethod.GET.toString()),
+                            new AntPathRequestMatcher("/users/", HttpMethod.GET.toString())
                     ).permitAll()
                     .and()
                     .authorizeHttpRequests().requestMatchers(
                             new AntPathRequestMatcher("/profiles/**", HttpMethod.DELETE.toString())
+
 
                     )
                     .authenticated().and()

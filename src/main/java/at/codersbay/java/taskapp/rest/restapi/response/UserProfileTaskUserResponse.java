@@ -1,33 +1,34 @@
 package at.codersbay.java.taskapp.rest.restapi.response;
 
-import at.codersbay.java.taskapp.rest.entities.AppUser;
 import at.codersbay.java.taskapp.rest.entities.Profile;
 import at.codersbay.java.taskapp.rest.entities.Task;
 import at.codersbay.java.taskapp.rest.entities.User;
 
 import java.util.Set;
 
-public class UserProfileTaskResponse {
+public class UserProfileTaskUserResponse {
 
  private User user;
  private Set<Task> tasks;
 
  private Profile profile;
 
+ //private AppUser appUser;
 
  private String errorMessage;
+ private String username;
 
 
 
-
-    public UserProfileTaskResponse(User user, Set<Task> tasks ,Profile profile) {
+    public UserProfileTaskUserResponse(User user, Set<Task> tasks , Profile profile, String username) {
         this.user = user;
         this.tasks = tasks;
         this.profile = profile;
-
+        //this.appUser= appUser;
+        this.username = username;
 
     }
-    public UserProfileTaskResponse(String errorMessage) {
+    public UserProfileTaskUserResponse(String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
@@ -53,6 +54,19 @@ public class UserProfileTaskResponse {
 
     public void setTasks(Set<Task> tasks) {
         this.tasks = tasks;
+    }
+
+    //public AppUser getAppUser() {return appUser;}
+
+    //public void setAppUser(AppUser appUser) {this.appUser = appUser;}
+
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public Profile getProfile() {

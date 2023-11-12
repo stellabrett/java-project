@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -130,7 +131,7 @@ logger.info("username  " + param.getUsername());
      * HTTP status 404 (NOT FOUND) if no user was found
      */
 
-    /*
+
     @GetMapping("/users")
     public ResponseEntity<List<UserProfileTaskResponse>> getUsers() {
         try {
@@ -155,7 +156,7 @@ logger.info("username  " + param.getUsername());
      * HTTP status 404 (Not found) and a message, null
      */
 
-    /*
+
     @GetMapping("/users/{id}")
     public ResponseEntity <UserProfileTaskResponse> getUserById(@PathVariable Long id) {
         try {
@@ -181,7 +182,7 @@ logger.info("username  " + param.getUsername());
      * HTTP status 500 (Bad Request) and a message if given id is null,
      * HTTP status 404 (Not found) and a message if no user was found
      */
-/**
+
     @GetMapping("/users/userByEmail/{email}")
     public ResponseEntity<UserProfileTaskResponse> getUserByEmail(@PathVariable String email) {
         try {
@@ -514,6 +515,8 @@ logger.info("username  " + param.getUsername());
      * HTTP status 404 (Not Found)a message and null,
      * HTTP status 500 (Bad Request) a message and null
      */
+
+
     @GetMapping("/task/{id}")
     public ResponseEntity<TaskUserResponse> getTaskById(@PathVariable Long id) {
         TaskUserResponse response = new TaskUserResponse();
@@ -567,7 +570,7 @@ logger.info("username  " + param.getUsername());
         return new ResponseEntity<>(response, status);
     }
 
-    //TODO da weiter
+
 
     /**
      * Api endpoint for updating a task by its it and optional its users
